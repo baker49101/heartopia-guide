@@ -15,6 +15,7 @@ import {
   Users
 } from '@lucide/astro';
 import type { HeartopiaCollection } from '../data/heartopiaCollections';
+import { SITE } from '../data/site';
 
 type Props = {
   collection: HeartopiaCollection;
@@ -55,6 +56,8 @@ const valueToText = (value: unknown): string => {
 };
 
 const fieldText = (item: Record<string, any>, key: string) => valueToText(item[key]);
+const itemAnchor = (item: Record<string, any>) => encodeURIComponent(String(item.id || item.name).toLowerCase());
+const pageUrl = new URL(Astro.url.pathname, SITE.url).href;
 
 const facetValues = collection.facets.map((facet) => ({
   ...facet,
@@ -78,6 +81,21 @@ const renderFieldValue = (item: Record<string, any>, field: HeartopiaCollection[
   if (field.prefix && (typeof value === 'number' || typeof value === 'string')) return `${field.prefix}${value}`;
   return valueToText(value);
 };
+
+const itemListSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: collection.title,
+  description: collection.description,
+  url: pageUrl,
+  numberOfItems: collection.items.length,
+  itemListElement: collection.items.slice(0, 120).map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    url: `${pageUrl}#${itemAnchor(item)}`
+  }))
+};
 ---
 
 <section class="collection-hero" data-pagefind-body>
@@ -85,6 +103,7 @@ const renderFieldValue = (item: Record<string, any>, field: HeartopiaCollection[
     <span class="eyebrow"><Icon size={16} aria-hidden="true" /> {collection.category}</span>
     <h1>{collection.title}</h1>
     <p class="lead">{collection.description}</p>
+    <p class="collection-context">Heartopia / 心动小镇{collection.navTitle}资料，适合按名称、地点、等级、条件和用途快速查询。</p>
   </div>
   <div class="collection-source-card">
     <strong>{collection.items.length}</strong>
@@ -94,7 +113,7 @@ const renderFieldValue = (item: Record<string, any>, field: HeartopiaCollection[
   </div>
 </section>
 
-<section class="section">
+<section class="section" data-pagefind-body>
   <div class="collection-toolbar" data-collection-explorer>
     <div class="collection-search">
       <label class="tag" for={`collection-search-${collection.slug}`}>搜索</label>
@@ -146,6 +165,7 @@ const renderFieldValue = (item: Record<string, any>, field: HeartopiaCollection[
         return (
           <article
             class="item-card"
+            id={itemAnchor(item)}
             data-collection-entry
             data-search={searchText}
             data-facets={JSON.stringify(facetPayload)}
@@ -207,6 +227,8 @@ const renderFieldValue = (item: Record<string, any>, field: HeartopiaCollection[
     }
   </div>
 </section>
+
+<script type="application/ld+json" set:html={JSON.stringify(itemListSchema)} />
 
 <script is:inline>
   (() => {

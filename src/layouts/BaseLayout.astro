@@ -32,12 +32,110 @@ type Props = {
   title?: string;
   description?: string;
   robots?: string;
+  image?: string;
+  canonical?: string;
+  schema?: Record<string, unknown> | Record<string, unknown>[];
 };
 
-const { title = SITE.name, description = SITE.description, robots } = Astro.props;
+const {
+  title = `${SITE.name} | Heartopia / 心动小镇攻略、图鉴与互动地图`,
+  description = SITE.description,
+  robots = 'index, follow, max-image-preview:large',
+  image = SITE.steamImage,
+  canonical,
+  schema = []
+} = Astro.props;
 const pathname = Astro.url.pathname;
 const isCurrent = (href: string) =>
   href === '/' ? pathname === '/' : pathname.startsWith(href);
+const canonicalUrl = canonical ?? new URL(pathname, SITE.url).href;
+const pageTitle = title === SITE.name ? `${SITE.name} | Heartopia / 心动小镇攻略、图鉴与互动地图` : title;
+
+const breadcrumbLabelMap: Record<string, string> = {
+  activities: '活动',
+  admin: '后台',
+  database: '图鉴',
+  fish: '鱼类',
+  npcs: '角色',
+  recipes: '食谱',
+  insects: '昆虫',
+  birds: '鸟类',
+  crops: '农作物',
+  flowers: '花卉',
+  forageables: '采集物',
+  wildlife: '野生动物',
+  pets: '宠物',
+  achievements: '成就',
+  music: '乐谱',
+  characters: '角色',
+  guides: '攻略',
+  beginner: '新手第一天',
+  'daily-routine': '每日清单',
+  'fishing-route': '钓鱼路线',
+  foraging: '采集整理',
+  'map-routing': '地图跑图',
+  'source-rules': '阅读说明',
+  maps: '地图',
+  search: '搜索',
+  sources: '参考资料',
+  tracker: '追踪器'
+};
+const segments = pathname.split('/').filter(Boolean);
+const breadcrumbItems = [
+  { name: SITE.name, url: SITE.url },
+  ...segments.map((segment, index) => {
+    const path = `/${segments.slice(0, index + 1).join('/')}/`;
+    return {
+      name: breadcrumbLabelMap[segment] ?? segment,
+      url: new URL(path, SITE.url).href
+    };
+  })
+];
+const extraSchema = Array.isArray(schema) ? schema : [schema];
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE.url}/#website`,
+      name: SITE.name,
+      alternateName: ['Heartopia Guide', '心动小镇攻略'],
+      url: SITE.url,
+      inLanguage: SITE.language,
+      description: SITE.description,
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${SITE.url}/search/?q={search_term_string}`,
+        'query-input': 'required name=search_term_string'
+      }
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: pageTitle,
+      description,
+      isPartOf: { '@id': `${SITE.url}/#website` },
+      inLanguage: SITE.language,
+      dateModified: SITE.updatedAt
+    },
+    ...(breadcrumbItems.length > 1
+      ? [
+          {
+            '@type': 'BreadcrumbList',
+            '@id': `${canonicalUrl}#breadcrumb`,
+            itemListElement: breadcrumbItems.map((item, index) => ({
+              '@type': 'ListItem',
+              position: index + 1,
+              name: item.name,
+              item: item.url
+            }))
+          }
+        ]
+      : []),
+    ...extraSchema
+  ]
+};
 
 const databaseMenu = [
   { href: '/database/achievements/', label: '成就', icon: Trophy },
@@ -61,15 +159,26 @@ const databaseMenu = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    {robots && <meta name="robots" content={robots} />}
-    <meta property="og:title" content={title} />
+    <meta name="robots" content={robots} />
+    <meta name="googlebot" content={robots} />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={Astro.url.href} />
-    <meta property="og:image" content={SITE.steamImage} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={image} />
+    <meta property="og:updated_time" content={SITE.updatedAt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
     <link rel="icon" href="/favicon.svg" />
     <link rel="manifest" href="/site.webmanifest" />
-    <title>{title}</title>
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <title>{pageTitle}</title>
   </head>
   <body>
     <a class="skip-link" href="#content" data-i18n="common.skip">跳到正文</a>
