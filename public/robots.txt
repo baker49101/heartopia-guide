@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://qichuan.xyz/sitemap-index.xml
+Sitemap: https://xdxz.qichuan.xyz/sitemap-index.xml

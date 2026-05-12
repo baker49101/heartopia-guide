@@ -1,6 +1,6 @@
 # 心动小镇攻略手账
 
-面向 Heartopia / 心动小镇玩家的轻量攻略站，计划部署到 GitHub Pages，并使用 `qichuan.xyz` 作为自定义域名。
+面向 Heartopia / 心动小镇玩家的轻量攻略站，计划部署到 GitHub Pages，并使用 `xdxz.qichuan.xyz` 作为自定义域名。
 
 ## 技术栈
 
@@ -46,5 +46,5 @@ PUBLIC_UMAMI_WEBSITE_ID=your-umami-website-id
 自定义域名文件位于 `public/CNAME`，内容为：
 
 ```text
-qichuan.xyz
+xdxz.qichuan.xyz
 ```

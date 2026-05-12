@@ -2,7 +2,7 @@
 
 ## 目标
 
-搭建一个轻量、可部署到 GitHub Pages 的 Heartopia / 心动小镇攻略向网站，使用 `qichuan.xyz` 作为自定义域名。网站需要贴合游戏温暖清新的生活模拟画风，并预留访问统计后台与实时在线“小绿灯”能力。
+搭建一个轻量、可部署到 GitHub Pages 的 Heartopia / 心动小镇攻略向网站。由于根域名 `qichuan.xyz` 需要继续服务现有博客，攻略站改用 `xdxz.qichuan.xyz` 作为自定义域名。网站需要贴合游戏温暖清新的生活模拟画风，并预留访问统计后台与实时在线“小绿灯”能力。
 
 ## 当前任务列表
 
@@ -21,7 +21,7 @@
 - 内容：Markdown 内容集合 + JSON/TS 数据
 - 搜索：Pagefind，生成静态索引
 - 部署：GitHub Pages
-- 域名：`qichuan.xyz`
+- 域名：`xdxz.qichuan.xyz`
 - 统计：先预留 Cloudflare Web Analytics / Umami 脚本位
 - 实时在线：前端组件调用 `api.qichuan.xyz` 心跳接口，后续可接 Cloudflare Worker
 
