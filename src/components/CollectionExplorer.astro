@@ -1,0 +1,265 @@
+---
+import {
+  Bird,
+  BookOpen,
+  Bug,
+  CookingPot,
+  Fish,
+  Flower2,
+  Heart,
+  Leaf,
+  Music,
+  PawPrint,
+  Sprout,
+  Trophy,
+  Users
+} from '@lucide/astro';
+import type { HeartopiaCollection } from '../data/heartopiaCollections';
+
+type Props = {
+  collection: HeartopiaCollection;
+};
+
+const { collection } = Astro.props;
+
+const iconMap = {
+  Bird,
+  BookOpen,
+  Bug,
+  CookingPot,
+  Fish,
+  Flower2,
+  Heart,
+  Leaf,
+  Music,
+  PawPrint,
+  Sprout,
+  Trophy,
+  Users
+};
+
+const Icon = iconMap[collection.icon as keyof typeof iconMap] ?? BookOpen;
+
+const isEmpty = (value: unknown) =>
+  value === null ||
+  value === undefined ||
+  value === '' ||
+  (Array.isArray(value) && value.length === 0) ||
+  (typeof value === 'object' && !Array.isArray(value) && Object.keys(value as Record<string, unknown>).length === 0);
+
+const valueToText = (value: unknown): string => {
+  if (isEmpty(value)) return '';
+  if (Array.isArray(value)) return value.map(valueToText).filter(Boolean).join(', ');
+  if (typeof value === 'object') return Object.values(value as Record<string, unknown>).map(valueToText).filter(Boolean).join(', ');
+  return String(value);
+};
+
+const fieldText = (item: Record<string, any>, key: string) => valueToText(item[key]);
+
+const facetValues = collection.facets.map((facet) => ({
+  ...facet,
+  values: Array.from(new Set(collection.items.map((item) => fieldText(item, facet.key)).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b, 'zh-CN')
+  )
+}));
+
+const starEntries = (value: unknown) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
+  return Object.entries(value as Record<string, unknown>)
+    .filter(([, amount]) => !isEmpty(amount))
+    .sort(([a], [b]) => Number.parseInt(a, 10) - Number.parseInt(b, 10));
+};
+
+const starCount = (key: string) => Number.parseInt(key, 10) || 1;
+
+const renderFieldValue = (item: Record<string, any>, field: HeartopiaCollection['fields'][number]) => {
+  const value = item[field.key];
+  if (isEmpty(value)) return '';
+  if (field.prefix && (typeof value === 'number' || typeof value === 'string')) return `${field.prefix}${value}`;
+  return valueToText(value);
+};
+---
+
+<section class="collection-hero" data-pagefind-body>
+  <div>
+    <span class="eyebrow"><Icon size={16} aria-hidden="true" /> {collection.category}</span>
+    <h1>{collection.title}</h1>
+    <p class="lead">{collection.description}</p>
+  </div>
+  <div class="collection-source-card">
+    <strong>{collection.items.length}</strong>
+    <span>{collection.countLabel}</span>
+    <a href={collection.sourceUrl} target="_blank" rel="noreferrer">来源站资料</a>
+    <small>抓取核对：{collection.sourceFetchedAt}</small>
+  </div>
+</section>
+
+<section class="section">
+  <div class="collection-toolbar" data-collection-explorer>
+    <div class="collection-search">
+      <label class="tag" for={`collection-search-${collection.slug}`}>搜索</label>
+      <input
+        id={`collection-search-${collection.slug}`}
+        class="filter-input"
+        type="search"
+        data-collection-query
+        placeholder={`搜索${collection.navTitle}、地点、条件或用途`}
+      />
+    </div>
+    <div class="collection-selects">
+      {
+        facetValues.map((facet) => (
+          <label>
+            <span>{facet.label}</span>
+            <select data-collection-facet={facet.key}>
+              <option value="">全部{facet.label}</option>
+              {facet.values.map((value) => <option value={value}>{value}</option>)}
+            </select>
+          </label>
+        ))
+      }
+      <label>
+        <span>排序</span>
+        <select data-collection-sort>
+          {collection.sortKeys.map((sort) => <option value={sort.key}>{sort.label}</option>)}
+        </select>
+      </label>
+    </div>
+  </div>
+
+  <div class="collection-note">
+    <strong>使用建议</strong>
+    <p>{collection.tip}</p>
+  </div>
+
+  <div class="collection-count-line">
+    <span data-collection-count>{collection.items.length}</span>
+    <span>条结果</span>
+  </div>
+
+  <div class="item-card-grid" data-collection-list>
+    {
+      collection.items.map((item) => {
+        const searchText = valueToText(item);
+        const facetPayload = Object.fromEntries(collection.facets.map((facet) => [facet.key, fieldText(item, facet.key)]));
+        const sortPayload = Object.fromEntries(collection.sortKeys.map((sort) => [sort.key, fieldText(item, sort.key)]));
+        return (
+          <article
+            class="item-card"
+            data-collection-entry
+            data-search={searchText}
+            data-facets={JSON.stringify(facetPayload)}
+            data-sort={JSON.stringify(sortPayload)}
+          >
+            <div class="item-card-head">
+              <span class="collection-icon small"><Icon size={20} aria-hidden="true" /></span>
+              <div>
+                <h2>{item.name}</h2>
+                <div class="caption-row">
+                  {collection.fields.slice(0, 3).map((field) => {
+                    const text = renderFieldValue(item, field);
+                    return text ? <span class="tag">{field.label}: {text}</span> : null;
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div class="item-field-list">
+              {
+                collection.fields.map((field) => {
+                  const value = item[field.key];
+                  if (isEmpty(value)) return null;
+                  if (field.kind === 'stars') {
+                    const rows = starEntries(value);
+                    if (rows.length === 0) return null;
+                    return (
+                      <div class="item-field wide">
+                        <span>{field.label}</span>
+                        <div class="star-price-row">
+                          {rows.map(([key, amount]) => (
+                            <span>
+                              <b>{'★'.repeat(starCount(key))}</b>
+                              {String(amount)}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  const text = renderFieldValue(item, field);
+                  return (
+                    <div class={`item-field ${field.kind === 'long' ? 'wide' : ''}`}>
+                      <span>{field.label}</span>
+                      <strong>{text}</strong>
+                    </div>
+                  );
+                })
+              }
+            </div>
+
+            <div class="item-card-footer">
+              <span>{item._meta?.confidence === 'high' ? '高可信' : '待复核'}</span>
+              <a href={item.sourceUrl || collection.sourceUrl} target="_blank" rel="noreferrer">查看来源</a>
+            </div>
+          </article>
+        );
+      })
+    }
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-collection-explorer]');
+    const list = document.querySelector('[data-collection-list]');
+    if (!root || !list) return;
+
+    const input = root.querySelector('[data-collection-query]');
+    const facets = Array.from(root.querySelectorAll('[data-collection-facet]'));
+    const sort = root.querySelector('[data-collection-sort]');
+    const count = document.querySelector('[data-collection-count]');
+    const cards = Array.from(list.querySelectorAll('[data-collection-entry]'));
+
+    const compareText = (a, b) => {
+      const numberA = Number(a);
+      const numberB = Number(b);
+      if (!Number.isNaN(numberA) && !Number.isNaN(numberB)) return numberA - numberB;
+      return String(a).localeCompare(String(b), 'zh-CN', { numeric: true });
+    };
+
+    const update = () => {
+      const keyword = input?.value.trim().toLowerCase() || '';
+      const activeFacets = Object.fromEntries(
+        facets.map((select) => [select.getAttribute('data-collection-facet'), select.value]).filter(([, value]) => value)
+      );
+      let visible = 0;
+      cards.forEach((card) => {
+        const search = (card.getAttribute('data-search') || '').toLowerCase();
+        const facetValues = JSON.parse(card.getAttribute('data-facets') || '{}');
+        const okSearch = !keyword || search.includes(keyword);
+        const okFacets = Object.entries(activeFacets).every(([key, value]) => facetValues[key] === value);
+        const show = okSearch && okFacets;
+        card.toggleAttribute('hidden', !show);
+        if (show) visible += 1;
+      });
+
+      const sortKey = sort?.value;
+      if (sortKey) {
+        cards
+          .slice()
+          .sort((a, b) => {
+            const sortA = JSON.parse(a.getAttribute('data-sort') || '{}');
+            const sortB = JSON.parse(b.getAttribute('data-sort') || '{}');
+            return compareText(sortA[sortKey] || '', sortB[sortKey] || '');
+          })
+          .forEach((card) => list.appendChild(card));
+      }
+      if (count) count.textContent = String(visible);
+    };
+
+    input?.addEventListener('input', update);
+    facets.forEach((select) => select.addEventListener('change', update));
+    sort?.addEventListener('change', update);
+    update();
+  })();
+</script>

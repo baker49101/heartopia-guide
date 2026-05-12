@@ -19,6 +19,25 @@ export type RoutePlan = {
   steps: string[];
 };
 
+export type MapLayerSummary = {
+  id: string;
+  label: string;
+  count: number;
+  description: string;
+};
+
+export const sourceInteractiveMapUrl = 'https://webresources.cc/heartopia/zh.html';
+
+export const mapLayerSummaries: MapLayerSummary[] = [
+  { id: 'locations', label: '地点', count: 34, description: '城镇、地标、水域与可导航区域。' },
+  { id: 'npcs', label: '角色', count: 20, description: '角色位置、导师、商店与互动对象。' },
+  { id: 'animals', label: '野生动物', count: 8, description: '野生动物刷新位置、天气和食物偏好。' },
+  { id: 'bus', label: '巴士站', count: 8, description: '快速移动节点，适合规划长路线。' },
+  { id: 'shops', label: '商店', count: 4, description: '服装、家具、宠物、书店等功能点。' },
+  { id: 'resources', label: '资源', count: 11, description: '浆果、水果、蘑菇、树木、石头等采集类资源。' },
+  { id: 'creatures', label: '生物图鉴', count: 206, description: '鱼类、昆虫和鸟类位置条件，用于收集补漏。' }
+];
+
 export const mapZones: MapZone[] = [
   {
     id: 'flower-street',
@@ -204,6 +223,43 @@ export const mapZones: MapZone[] = [
   }
 ];
 
+export const mapPins = [
+  ...mapZones.map((zone) => ({
+    id: zone.id,
+    name: zone.name,
+    layer: 'locations',
+    x: zone.x,
+    y: zone.y,
+    tone: zone.tone,
+    summary: zone.summary,
+    detail: zone.routeTip,
+    tags: [zone.type, ...zone.focus]
+  })),
+  { id: 'npc-vanya', name: '瓦尼亚', layer: 'npcs', x: 53, y: 76, tone: 'npc', summary: '钓鱼导师，提供钓鱼相关教学和海钓入口。', detail: '适合与海钓、旧海和码头路线一起查看。', tags: ['角色', '导师', '钓鱼'] },
+  { id: 'npc-blanc', name: '布兰克', layer: 'npcs', x: 44, y: 45, tone: 'npc', summary: '园艺导师，关联种子、花卉和农作物路线。', detail: '跑花田或农田前先确认园艺目标。', tags: ['角色', '导师', '园艺'] },
+  { id: 'npc-bob', name: '鲍勃', layer: 'npcs', x: 49, y: 49, tone: 'npc', summary: '小镇中心常见居民点位。', detail: '适合放进每日拜访和礼物清单。', tags: ['角色', '居民'] },
+  { id: 'npc-alara', name: '阿塔拉', layer: 'npcs', x: 59, y: 49, tone: 'npc', summary: '中心区附近角色点位。', detail: '和中央广场、居民街一起跑更顺。', tags: ['角色', '居民'] },
+  { id: 'npc-joan', name: '琼女士', layer: 'npcs', x: 52, y: 54, tone: 'shop', summary: '宠物店相关角色，关联猫狗领养。', detail: '查询宠物图鉴后，可从这里安排领养目标。', tags: ['角色', '宠物店'] },
+  { id: 'npc-will', name: 'Will', layer: 'npcs', x: 43, y: 87, tone: 'npc', summary: '灯塔守护者，位于渔村灯塔方向。', detail: '和旧海、灯塔、海钓路线放在同一轮。', tags: ['角色', '灯塔'] },
+  { id: 'shop-fashion', name: '服装店', layer: 'shops', x: 50, y: 48, tone: 'shop', summary: '小镇中心功能商店。', detail: '适合和角色拜访、活动入口一起查看。', tags: ['商店', '小镇'] },
+  { id: 'shop-furniture', name: '家具店', layer: 'shops', x: 56, y: 50, tone: 'shop', summary: '家具和装饰相关功能点。', detail: '做家园布置或家具采购时优先查看。', tags: ['商店', '家具'] },
+  { id: 'shop-pet', name: '宠物店', layer: 'shops', x: 53, y: 56, tone: 'shop', summary: '猫咪、狗狗与宠物家具相关功能点。', detail: '宠物品种每日刷新，可和宠物图鉴一起使用。', tags: ['商店', '宠物'] },
+  { id: 'shop-book', name: '书店', layer: 'shops', x: 48, y: 52, tone: 'shop', summary: '书籍和生活功能相关商店。', detail: '经过中央广场时顺手确认。', tags: ['商店'] },
+  { id: 'bus-onsen', name: '温泉山巴士', layer: 'bus', x: 63, y: 18, tone: 'bus', summary: '温泉山方向快速移动点。', detail: '适合温泉山湖、岩石悬崖和山地采集。', tags: ['巴士', '温泉山'] },
+  { id: 'bus-forest', name: '森林巴士', layer: 'bus', x: 78, y: 43, tone: 'bus', summary: '森林与上森林湖方向快速移动点。', detail: '跑森林湖、巨木河和森林采集时优先使用。', tags: ['巴士', '森林'] },
+  { id: 'bus-ranch', name: '牧场巴士', layer: 'bus', x: 27, y: 62, tone: 'bus', summary: '西南草地和花田方向快速移动点。', detail: '适合花田、草地湖和西侧海岸路线。', tags: ['巴士', '花田'] },
+  { id: 'bus-village', name: '渔村巴士', layer: 'bus', x: 48, y: 80, tone: 'bus', summary: '渔村与灯塔方向快速移动点。', detail: '适合旧海、灯塔和海钓前置路线。', tags: ['巴士', '渔村'] },
+  { id: 'resource-berries', name: '浆果群', layer: 'resources', x: 35, y: 35, tone: 'resource', summary: '日常采集资源点。', detail: '适合补料理素材或低压力日常采集。', tags: ['资源', '采集'] },
+  { id: 'resource-mushroom', name: '蘑菇带', layer: 'resources', x: 68, y: 53, tone: 'resource', summary: '森林附近常见采集目标。', detail: '和森林湖、巨木河、观鸟路线合并。', tags: ['资源', '森林'] },
+  { id: 'resource-rocks', name: '石头矿点', layer: 'resources', x: 66, y: 20, tone: 'resource', summary: '山地区域资源点。', detail: '温泉山路线中顺路检查。', tags: ['资源', '矿物'] },
+  { id: 'animal-capybara', name: '水豚', layer: 'animals', x: 58, y: 62, tone: 'animal', summary: '野生动物图鉴记录点。', detail: '雨天偏好目标，可搭配静谧河路线。', tags: ['野生动物', '雨天'] },
+  { id: 'animal-deer', name: '鹿', layer: 'animals', x: 72, y: 41, tone: 'animal', summary: '森林方向野生动物。', detail: '晴天优先检查森林和鹿塔附近。', tags: ['野生动物', '晴天'] },
+  { id: 'animal-ferret', name: '雪貂', layer: 'animals', x: 25, y: 72, tone: 'animal', summary: '桥边与河岸附近野生动物。', detail: '彩虹天优先加入路线。', tags: ['野生动物', '彩虹天'] },
+  { id: 'creature-fish', name: '鱼类点位', layer: 'creatures', x: 38, y: 84, tone: 'creature', summary: '鱼类图鉴共 90 条，按水域、天气、时间和鱼影筛选。', detail: '点击图鉴鱼类可查完整售价和条件。', tags: ['生物', '鱼类'] },
+  { id: 'creature-insect', name: '昆虫点位', layer: 'creatures', x: 68, y: 33, tone: 'creature', summary: '昆虫图鉴共 69 条，重点看天气、时间和出现区域。', detail: '彩虹和雨天限定目标建议单独追踪。', tags: ['生物', '昆虫'] },
+  { id: 'creature-bird', name: '鸟类点位', layer: 'creatures', x: 80, y: 28, tone: 'creature', summary: '鸟类图鉴共 66 条，适合与采集路线合并。', detail: '观鸟路线可从温泉山、森林湖和花田开始。', tags: ['生物', '鸟类'] }
+];
+
 export const routePlans: RoutePlan[] = [
   {
     title: '新手开图路线',
@@ -248,6 +304,10 @@ export const routePlans: RoutePlan[] = [
 ];
 
 export const mapSourceLinks = [
+  {
+    label: 'Heartopia.live：高清互动地图',
+    href: 'https://www.heartopia.live/zh/world-map/'
+  },
   {
     label: '玩一玩：心动小镇鱼类分布图',
     href: 'https://www.wywyx.com/gonglue/202408/477276.html'

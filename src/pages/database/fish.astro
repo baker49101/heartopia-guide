@@ -1,14 +1,11 @@
 ---
-import DatabaseTable from '../../components/DatabaseTable.astro';
-import { fishEntries } from '../../data/database';
+import CollectionExplorer from '../../components/CollectionExplorer.astro';
+import { getHeartopiaCollection } from '../../data/heartopiaCollections';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const collection = getHeartopiaCollection('fish');
 ---
 
-<BaseLayout title="鱼类图鉴 | 心动小镇攻略手账" description="Heartopia / 心动小镇鱼类图鉴。">
-  <section class="content-shell" data-pagefind-body>
-    <span class="eyebrow">Fishing</span>
-    <h1>鱼类图鉴</h1>
-    <p class="lead">按地点、时间、天气和用途整理，适合快速规划钓鱼路线。</p>
-    <DatabaseTable entries={fishEntries} searchLabel="搜索鱼名、地点、天气或用途" />
-  </section>
+<BaseLayout title="鱼类图鉴 | 心动小镇攻略手账" description={collection.description}>
+  <CollectionExplorer collection={collection} />
 </BaseLayout>

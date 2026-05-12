@@ -1,14 +1,11 @@
 ---
-import DatabaseTable from '../../components/DatabaseTable.astro';
-import { recipeEntries } from '../../data/database';
+import CollectionExplorer from '../../components/CollectionExplorer.astro';
+import { getHeartopiaCollection } from '../../data/heartopiaCollections';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const collection = getHeartopiaCollection('recipes');
 ---
 
-<BaseLayout title="食谱图鉴 | 心动小镇攻略手账" description="Heartopia / 心动小镇食谱图鉴。">
-  <section class="content-shell" data-pagefind-body>
-    <span class="eyebrow">Cooking</span>
-    <h1>食谱图鉴</h1>
-    <p class="lead">记录食材组合、解锁方式、用途和居民喜好。</p>
-    <DatabaseTable entries={recipeEntries} searchLabel="搜索食谱、食材、用途或解锁方式" />
-  </section>
+<BaseLayout title="食谱图鉴 | 心动小镇攻略手账" description={collection.description}>
+  <CollectionExplorer collection={collection} />
 </BaseLayout>

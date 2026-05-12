@@ -1,6 +1,6 @@
 ---
-import { Compass, Fish, LocateFixed, Map, Minus, Plus, Route, Search } from '@lucide/astro';
-import { mapSourceLinks, mapZones, routePlans } from '../../data/maps';
+import { Compass, ExternalLink, Fish, Layers, LocateFixed, Map, Minus, Plus, Route, Search } from '@lucide/astro';
+import { mapLayerSummaries, mapPins, mapSourceLinks, mapZones, routePlans, sourceInteractiveMapUrl } from '../../data/maps';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
@@ -33,21 +33,21 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
               <span>花园街 / 商店 / 导师</span>
             </div>
             {
-              mapZones.map((zone) => (
+              mapPins.map((pin) => (
                 <button
                   type="button"
-                  class={`map-pin ${zone.tone}`}
-                  style={`--x:${zone.x}%; --y:${zone.y}%`}
-                  aria-label={`${zone.name}：${zone.type}`}
+                  class={`map-pin ${pin.tone}`}
+                  style={`--x:${pin.x}%; --y:${pin.y}%`}
+                  aria-label={`${pin.name}：${pin.layer}`}
                   data-map-pin
-                  data-zone-id={zone.id}
-                  data-zone-name={zone.name}
-                  data-zone-summary={zone.summary}
-                  data-zone-tip={zone.routeTip}
-                  data-type={zone.type}
-                  data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}
+                  data-zone-id={pin.id}
+                  data-zone-name={pin.name}
+                  data-zone-summary={pin.summary}
+                  data-zone-tip={pin.detail}
+                  data-layer={pin.layer}
+                  data-search={`${pin.name} ${pin.layer} ${pin.tags.join(' ')} ${pin.summary}`}
                 >
-                  <span>{zone.name}</span>
+                  <span>{pin.name}</span>
                 </button>
               ))
             }
@@ -66,13 +66,22 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           <label class="tag" for="map-search"><Search size={14} aria-hidden="true" /> <span data-i18n="maps.filter.label">地图筛选</span></label>
           <input id="map-search" class="filter-input" type="search" data-map-search data-i18n-placeholder="maps.filter.placeholder" placeholder="搜索海域、湖泊、河流、钓鱼、采集" />
           <div class="map-filters" data-map-filters>
-            {[
-              { label: '全部', key: 'maps.filter.all' },
-              { label: '海域', key: 'maps.filter.sea' },
-              { label: '湖泊', key: 'maps.filter.lake' },
-              { label: '河流', key: 'maps.filter.river' },
-              { label: '功能区', key: 'maps.filter.town' }
-            ].map((type) => <button type="button" class="tag" data-map-filter={type.label} data-i18n={type.key}>{type.label}</button>)}
+            <button type="button" class="tag" data-map-filter="全部" data-i18n="maps.filter.all">全部</button>
+            {mapLayerSummaries.map((layer) => <button type="button" class="tag" data-map-filter={layer.id}>{layer.label}</button>)}
+          </div>
+        </div>
+        <div class="soft-band map-layer-card">
+          <h2><Layers size={16} aria-hidden="true" /> 图层概览</h2>
+          <div class="layer-list">
+            {
+              mapLayerSummaries.map((layer) => (
+                <button type="button" data-map-layer-jump={layer.id}>
+                  <strong>{layer.label}</strong>
+                  <span>{layer.count}</span>
+                  <small>{layer.description}</small>
+                </button>
+              ))
+            }
           </div>
         </div>
         <div class="soft-band">
@@ -91,6 +100,20 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <section class="section">
     <div class="section-head">
       <div>
+        <span class="eyebrow"><ExternalLink size={16} aria-hidden="true" /> Source Map</span>
+        <h2>高清互动地图</h2>
+        <p>这里嵌入来源站公开的高清互动地图，用来核对精确点位；上方本站地图更适合快速筛选路线和加入追踪。</p>
+      </div>
+      <a class="btn secondary" href={sourceInteractiveMapUrl} target="_blank" rel="noreferrer">新窗口打开</a>
+    </div>
+    <div class="source-map-frame">
+      <iframe src={sourceInteractiveMapUrl} title="Heartopia.live 高清互动地图" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
         <span class="eyebrow"><Fish size={16} aria-hidden="true" /> Zones</span>
         <h2 data-i18n="maps.zones.title">区域资料卡</h2>
         <p data-i18n="maps.zones.lead">按海域、湖泊、河流和功能区整理，适合查钓鱼、采集和活动路线。</p>
@@ -99,7 +122,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <div class="zone-grid" data-map-zone-list>
       {
         mapZones.map((zone) => (
-          <article id={zone.id} class="zone-card" data-map-zone data-type={zone.type} data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}>
+          <article id={zone.id} class="zone-card" data-map-zone data-type={zone.type} data-layer="locations" data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}>
             <div>
               <span class={`zone-type ${zone.tone}`}>{zone.type}</span>
               <h3>{zone.name}</h3>
@@ -185,7 +208,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     const update = () => {
       const keyword = input?.value.trim().toLowerCase() ?? '';
       const apply = (node) => {
-        const type = node.getAttribute('data-type');
+        const type = node.getAttribute('data-layer') || node.getAttribute('data-type');
         const text = node.getAttribute('data-search')?.toLowerCase() ?? '';
         const visible = (currentType === '全部' || type === currentType) && (!keyword || text.includes(keyword));
         node.toggleAttribute('hidden', !visible);
@@ -199,6 +222,12 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     filters.forEach((button) => {
       button.addEventListener('click', () => {
         currentType = button.getAttribute('data-map-filter') ?? '全部';
+        update();
+      });
+    });
+    document.querySelectorAll('[data-map-layer-jump]').forEach((button) => {
+      button.addEventListener('click', () => {
+        currentType = button.getAttribute('data-map-layer-jump') || '全部';
         update();
       });
     });

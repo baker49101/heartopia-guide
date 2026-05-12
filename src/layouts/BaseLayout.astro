@@ -1,5 +1,26 @@
 ---
-import { BookOpen, CalendarDays, ClipboardCheck, Database, Home, Map, Search } from '@lucide/astro';
+import {
+  Bird,
+  BookOpen,
+  Bug,
+  CalendarDays,
+  ChevronDown,
+  ClipboardCheck,
+  CookingPot,
+  Database,
+  Fish,
+  Flower2,
+  Heart,
+  Home,
+  Leaf,
+  Map,
+  Music,
+  PawPrint,
+  Search,
+  Sprout,
+  Trophy,
+  Users
+} from '@lucide/astro';
 import AnalyticsClient from '../components/AnalyticsClient.astro';
 import I18nClient from '../components/I18nClient.astro';
 import LanguageSwitcher from '../components/LanguageSwitcher.astro';
@@ -17,6 +38,21 @@ const { title = SITE.name, description = SITE.description, robots } = Astro.prop
 const pathname = Astro.url.pathname;
 const isCurrent = (href: string) =>
   href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+const databaseMenu = [
+  { href: '/database/achievements/', label: '成就', icon: Trophy },
+  { href: '/database/fish/', label: '鱼类', icon: Fish },
+  { href: '/database/insects/', label: '昆虫', icon: Bug },
+  { href: '/database/birds/', label: '鸟类', icon: Bird },
+  { href: '/database/crops/', label: '农作物', icon: Sprout },
+  { href: '/database/flowers/', label: '花卉', icon: Flower2 },
+  { href: '/database/forageables/', label: '采集物', icon: Leaf },
+  { href: '/database/wildlife/', label: '野生动物', icon: PawPrint },
+  { href: '/database/pets/', label: '宠物', icon: Heart },
+  { href: '/database/music/', label: '乐谱', icon: Music },
+  { href: '/database/recipes/', label: '食谱', icon: CookingPot },
+  { href: '/database/characters/', label: '角色', icon: Users }
+];
 ---
 
 <!doctype html>
@@ -53,9 +89,25 @@ const isCurrent = (href: string) =>
           <a class="nav-link" href="/guides/" aria-current={isCurrent('/guides/') ? 'page' : undefined}>
             <BookOpen size={17} aria-hidden="true" /> <span data-i18n="nav.guides">攻略</span>
           </a>
-          <a class="nav-link" href="/database/" aria-current={isCurrent('/database/') ? 'page' : undefined}>
-            <Database size={17} aria-hidden="true" /> <span data-i18n="nav.database">图鉴</span>
-          </a>
+          <div class="nav-dropdown">
+            <a class="nav-link" href="/database/" aria-current={isCurrent('/database/') ? 'page' : undefined}>
+              <Database size={17} aria-hidden="true" /> <span data-i18n="nav.database">图鉴</span>
+              <ChevronDown size={14} aria-hidden="true" />
+            </a>
+            <div class="nav-menu" aria-label="图鉴分类">
+              {
+                databaseMenu.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <a class="nav-menu-link" href={item.href}>
+                      <Icon size={15} aria-hidden="true" />
+                      <span>{item.label}</span>
+                    </a>
+                  );
+                })
+              }
+            </div>
+          </div>
           <a class="nav-link" href="/activities/" aria-current={isCurrent('/activities/') ? 'page' : undefined}>
             <CalendarDays size={17} aria-hidden="true" /> <span data-i18n="nav.activities">活动</span>
           </a>

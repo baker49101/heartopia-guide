@@ -1,14 +1,11 @@
 ---
-import DatabaseTable from '../../components/DatabaseTable.astro';
-import { npcEntries } from '../../data/database';
+import CollectionExplorer from '../../components/CollectionExplorer.astro';
+import { getHeartopiaCollection } from '../../data/heartopiaCollections';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const collection = getHeartopiaCollection('characters');
 ---
 
-<BaseLayout title="NPC 好感 | 心动小镇攻略手账" description="Heartopia / 心动小镇 NPC 好感资料。">
-  <section class="content-shell" data-pagefind-body>
-    <span class="eyebrow">Residents</span>
-    <h1>NPC 好感</h1>
-    <p class="lead">记录居民位置、偏好、生日和互动节点，适合安排每日拜访。</p>
-    <DatabaseTable entries={npcEntries} searchLabel="搜索居民、礼物、地点或用途" />
-  </section>
+<BaseLayout title="角色图鉴 | 心动小镇攻略手账" description={collection.description}>
+  <CollectionExplorer collection={collection} />
 </BaseLayout>

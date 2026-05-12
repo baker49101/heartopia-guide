@@ -1,0 +1,21 @@
+---
+import CollectionExplorer from '../../components/CollectionExplorer.astro';
+import { heartopiaCollections } from '../../data/heartopiaCollections';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export function getStaticPaths() {
+  const fixedRoutes = new Set(['fish', 'recipes']);
+  return heartopiaCollections
+    .filter((collection) => !fixedRoutes.has(collection.slug))
+    .map((collection) => ({
+      params: { slug: collection.slug },
+      props: { collection }
+    }));
+}
+
+const { collection } = Astro.props;
+---
+
+<BaseLayout title={`${collection.title} | 心动小镇攻略手账`} description={collection.description}>
+  <CollectionExplorer collection={collection} />
+</BaseLayout>
