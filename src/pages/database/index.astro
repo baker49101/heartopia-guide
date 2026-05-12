@@ -1,27 +1,101 @@
 ---
-import GuideCard from '../../components/GuideCard.astro';
-import { databaseGroups } from '../../data/database';
+import {
+  Bird,
+  Bug,
+  ClipboardCheck,
+  CookingPot,
+  Fish,
+  Flower2,
+  Gift,
+  Heart,
+  Leaf,
+  Map,
+  Music,
+  PawPrint,
+  Sprout,
+  Trophy,
+  Users
+} from '@lucide/astro';
+import { collectionGroups } from '../../data/database';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const iconMap = {
+  Bird,
+  Bug,
+  ClipboardCheck,
+  CookingPot,
+  Fish,
+  Flower2,
+  Gift,
+  Heart,
+  Leaf,
+  Map,
+  Music,
+  PawPrint,
+  Sprout,
+  Trophy,
+  Users
+};
 ---
 
 <BaseLayout title="图鉴 | 心动小镇攻略手账" description="Heartopia / 心动小镇图鉴资料库。">
-  <section class="content-shell" data-pagefind-body>
+  <section class="content-shell wide" data-pagefind-body>
     <span class="eyebrow">Database</span>
-    <h1>小镇图鉴资料库</h1>
-    <p class="lead">鱼类、食谱、NPC 放在同一处，查路线和用途更省事。</p>
+    <h1 data-i18n="database.title">小镇图鉴资料库</h1>
+    <p class="lead" data-i18n="database.lead">收集、料理、居民、地图、成就和音乐放在同一处，查路线和用途更省事。</p>
   </section>
   <section class="section">
-    <div class="grid three">
+    <div class="table-tools">
+      <input class="filter-input" type="search" data-collection-search data-i18n-placeholder="database.search.placeholder" placeholder="搜索鱼类、食谱、地图、成就" />
+      <div class="map-filters">
+        {[
+          { label: '全部', key: 'database.all' },
+          { label: '收集', key: 'database.collecting' },
+          { label: '生活', key: 'database.life' },
+          { label: '居民', key: 'database.social' },
+          { label: '工具', key: 'database.tools' }
+        ].map((type) => <button type="button" class="tag" data-collection-filter={type.label} data-i18n={type.key}>{type.label}</button>)}
+      </div>
+    </div>
+    <div class="collection-grid">
       {
-        databaseGroups.map((group) => (
-          <GuideCard
-            title={group.title}
-            description={`${group.description} 当前条目：${group.count}`}
-            href={group.href}
-            label="图鉴"
-          />
-        ))
+        collectionGroups.map((group) => {
+          const Icon = iconMap[group.icon];
+          return (
+            <a class="collection-card" href={group.href} data-collection-card data-category={group.category} data-search={`${group.title} ${group.category} ${group.description}`}>
+              <span class="collection-icon"><Icon size={24} aria-hidden="true" /></span>
+              <span class="tag" data-i18n={group.categoryKey}>{group.category}</span>
+              <h3 data-i18n={group.titleKey}>{group.title}</h3>
+              <p data-i18n={group.descriptionKey}>{group.description}</p>
+              <strong>{group.count}</strong>
+            </a>
+          );
+        })
       }
     </div>
   </section>
+
+  <script is:inline>
+    (() => {
+    const input = document.querySelector('[data-collection-search]');
+    const cards = Array.from(document.querySelectorAll('[data-collection-card]'));
+    const buttons = Array.from(document.querySelectorAll('[data-collection-filter]'));
+    let current = '全部';
+    const update = () => {
+      const keyword = input?.value.trim().toLowerCase() ?? '';
+      cards.forEach((card) => {
+        const okCategory = current === '全部' || card.getAttribute('data-category') === current;
+        const okKeyword = !keyword || (card.getAttribute('data-search') || '').toLowerCase().includes(keyword);
+        card.toggleAttribute('hidden', !(okCategory && okKeyword));
+      });
+      buttons.forEach((button) => button.toggleAttribute('aria-pressed', button.getAttribute('data-collection-filter') === current));
+    };
+    input?.addEventListener('input', update);
+    buttons.forEach((button) => button.addEventListener('click', () => {
+      current = button.getAttribute('data-collection-filter') || '全部';
+      update();
+    }));
+    update();
+    })();
+  </script>
 </BaseLayout>

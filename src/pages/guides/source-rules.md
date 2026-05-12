@@ -5,6 +5,7 @@ description: 了解本站内容、参考资料和使用方式。
 category: 说明
 updatedAt: 2026-05-12
 source: 官方与公开资料
+translationKey: about
 ---
 
 ## 这个网站适合怎么用

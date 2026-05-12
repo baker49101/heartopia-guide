@@ -6,16 +6,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="搜索 | 心动小镇攻略手账" description="搜索 Heartopia / 心动小镇攻略与图鉴。">
   <section class="content-shell" data-pagefind-body>
     <span class="eyebrow"><Search size={16} aria-hidden="true" /> Search</span>
-    <h1>搜索小镇手账</h1>
-    <p class="lead">输入鱼类、食谱、NPC、地图区域或活动关键词，快速查找相关内容。</p>
+    <h1 data-i18n="search.title">搜索小镇手账</h1>
+    <p class="lead" data-i18n="search.lead">输入鱼类、食谱、NPC、地图区域或活动关键词，快速查找相关内容。</p>
     <div class="search-box">
       <div id="search"></div>
-      <p id="search-fallback">搜索准备中，请稍后再试。</p>
+      <p id="search-fallback" data-i18n="search.fallback">搜索准备中，请稍后再试。</p>
     </div>
   </section>
-</BaseLayout>
 
-<script>
+  <script>
   const fallback = document.querySelector('#search-fallback');
   const params = new URLSearchParams(location.search);
   const q = params.get('q') ?? '';
@@ -47,6 +46,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     }
   } catch {
-    if (fallback) fallback.textContent = '搜索准备中，请稍后再试。';
+    if (fallback) fallback.textContent = window.heartopiaI18n?.ui?.[window.heartopiaI18n.getLanguage?.() || 'zh']?.['search.fallback'] || '搜索准备中，请稍后再试。';
   }
-</script>
+  </script>
+</BaseLayout>

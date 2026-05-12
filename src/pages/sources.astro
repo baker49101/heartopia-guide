@@ -7,16 +7,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="参考资料 | 心动小镇攻略手账" description="Heartopia 攻略站参考资料。">
   <section class="content-shell" data-pagefind-body>
     <span class="eyebrow">Sources</span>
-    <h1>参考资料</h1>
-    <p class="lead">这里收录官网、平台页面和常用攻略参考，方便继续查阅。</p>
+    <h1 data-i18n="sources.title">参考资料</h1>
+    <p class="lead" data-i18n="sources.lead">这里收录官网、平台页面和常用攻略参考，方便继续查阅。</p>
     <div class="soft-band">
-      <h2>官方与平台</h2>
+      <h2 data-i18n="sources.official">官方与平台</h2>
       <ul class="checklist">
         {SITE.officialLinks.map((link) => <li><a href={link.href} target="_blank" rel="noreferrer">{link.label}</a></li>)}
       </ul>
     </div>
     <div class="soft-band" style="margin-top: 16px;">
-      <h2>攻略参考</h2>
+      <h2 data-i18n="sources.community">攻略参考</h2>
       <ul class="checklist">
         {mapSourceLinks.map((link) => <li><a href={link.href} target="_blank" rel="noreferrer">{link.label}</a></li>)}
       </ul>

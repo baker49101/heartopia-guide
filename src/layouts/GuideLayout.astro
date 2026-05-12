@@ -6,15 +6,17 @@ const { frontmatter } = Astro.props;
 
 <BaseLayout title={`${frontmatter.title} | 心动小镇攻略手账`} description={frontmatter.description}>
   <div class="guide-shell">
-    <article class="guide-article" data-pagefind-body>
-      <span class="eyebrow">{frontmatter.category ?? '攻略'}</span>
-      <h1>{frontmatter.title}</h1>
-      <p class="lead">{frontmatter.description}</p>
+    <article class="guide-article" data-pagefind-body data-guide-key={frontmatter.translationKey}>
+      <span class="eyebrow" data-guide-category>{frontmatter.category ?? '攻略'}</span>
+      <h1 data-guide-title>{frontmatter.title}</h1>
+      <p class="lead" data-guide-description>{frontmatter.description}</p>
       <div class="guide-meta">
-        <span class="tag">更新：{frontmatter.updatedAt}</span>
-        <span class="tag">参考：{frontmatter.source}</span>
+        <span class="tag"><span data-i18n="guide.updated">更新</span>：{frontmatter.updatedAt}</span>
+        <span class="tag"><span data-i18n="guide.reference">参考</span>：<span data-guide-source>{frontmatter.source}</span></span>
       </div>
-      <slot />
+      <div data-guide-body>
+        <slot />
+      </div>
     </article>
   </div>
 </BaseLayout>

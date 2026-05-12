@@ -5,6 +5,7 @@ description: 把每日上线后最容易遗漏的事项整理成清单。
 category: 日常
 updatedAt: 2026-05-12
 source: 官方玩法介绍
+translationKey: daily
 ---
 
 ## 每日上线顺序

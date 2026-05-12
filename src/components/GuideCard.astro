@@ -6,17 +6,20 @@ type Props = {
   description: string;
   href: string;
   label?: string;
+  titleKey?: string;
+  descriptionKey?: string;
+  labelKey?: string;
 };
 
-const { title, description, href, label = 'Guide' } = Astro.props;
+const { title, description, href, label = 'Guide', titleKey, descriptionKey, labelKey } = Astro.props;
 ---
 
 <a class="card" href={href}>
-  <span class="tag">{label}</span>
-  <h3>{title}</h3>
-  <p>{description}</p>
+  <span class="tag" data-i18n={labelKey}>{label}</span>
+  <h3 data-i18n={titleKey}>{title}</h3>
+  <p data-i18n={descriptionKey}>{description}</p>
   <span class="card-meta">
-    <span>打开手账</span>
+    <span data-i18n="card.open">打开手账</span>
     <ArrowRight size={18} aria-hidden="true" />
   </span>
 </a>

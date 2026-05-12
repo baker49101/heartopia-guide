@@ -13,4 +13,9 @@ interface ImportMeta {
 
 interface Window {
   PagefindUI: new (options: Record<string, unknown>) => unknown;
+  heartopiaI18n?: {
+    applyLanguage: (language: string) => void;
+    getLanguage: () => string;
+    ui: Record<string, Record<string, string>>;
+  };
 }

@@ -1,5 +1,5 @@
 ---
-import { Compass, Fish, Map, Route, Search } from '@lucide/astro';
+import { Compass, Fish, LocateFixed, Map, Minus, Plus, Route, Search } from '@lucide/astro';
 import { mapSourceLinks, mapZones, routePlans } from '../../data/maps';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
@@ -7,55 +7,81 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 <BaseLayout title="地图 | 心动小镇攻略手账" description="Heartopia / 心动小镇地图资源与路线。">
   <section class="content-shell wide" data-pagefind-body>
     <span class="eyebrow"><Map size={16} aria-hidden="true" /> Maps</span>
-    <h1>小镇地图与跑图路线</h1>
-    <p class="lead">
+    <h1 data-i18n="maps.title">小镇地图与跑图路线</h1>
+    <p class="lead" data-i18n="maps.lead">
       把常用水域、资源线和功能区整理成一张攻略地图。想钓鱼、采集、跑活动，先从这里选路线。
     </p>
   </section>
 
   <section class="section">
-    <div class="map-layout">
+    <div class="map-layout" data-interactive-map>
       <div class="map-panel" aria-label="心动小镇攻略手账地图">
-        <div class="map-water sea-one"></div>
-        <div class="map-water sea-two"></div>
-        <div class="map-river river-one"></div>
-        <div class="map-river river-two"></div>
-        <div class="map-town-core">
-          <Compass size={28} aria-hidden="true" />
-          <strong>小镇中心</strong>
-          <span>花园街 / 商店 / 导师</span>
+        <div class="map-toolbar">
+          <button type="button" data-map-zoom="in" aria-label="Zoom in"><Plus size={16} aria-hidden="true" /></button>
+          <button type="button" data-map-zoom="out" aria-label="Zoom out"><Minus size={16} aria-hidden="true" /></button>
+          <button type="button" data-map-reset aria-label="Reset map"><LocateFixed size={16} aria-hidden="true" /></button>
         </div>
-        {
-          mapZones.map((zone) => (
-            <a
-              class={`map-pin ${zone.tone}`}
-              href={`#${zone.id}`}
-              style={`--x:${zone.x}%; --y:${zone.y}%`}
-              aria-label={`${zone.name}：${zone.type}`}
-              data-map-pin
-              data-type={zone.type}
-              data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}
-            >
-              <span>{zone.name}</span>
-            </a>
-          ))
-        }
+        <div class="map-viewport" data-map-viewport>
+          <div class="map-stage" data-map-stage>
+            <div class="map-water sea-one"></div>
+            <div class="map-water sea-two"></div>
+            <div class="map-river river-one"></div>
+            <div class="map-river river-two"></div>
+            <div class="map-town-core">
+              <Compass size={28} aria-hidden="true" />
+              <strong>小镇中心</strong>
+              <span>花园街 / 商店 / 导师</span>
+            </div>
+            {
+              mapZones.map((zone) => (
+                <button
+                  type="button"
+                  class={`map-pin ${zone.tone}`}
+                  style={`--x:${zone.x}%; --y:${zone.y}%`}
+                  aria-label={`${zone.name}：${zone.type}`}
+                  data-map-pin
+                  data-zone-id={zone.id}
+                  data-zone-name={zone.name}
+                  data-zone-summary={zone.summary}
+                  data-zone-tip={zone.routeTip}
+                  data-type={zone.type}
+                  data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}
+                >
+                  <span>{zone.name}</span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+        <div class="map-detail" data-map-detail hidden>
+          <strong data-map-detail-title></strong>
+          <p data-map-detail-summary></p>
+          <small data-map-detail-tip></small>
+          <a class="btn secondary" href="/tracker/" data-map-track data-i18n="maps.detail.track">加入今日追踪</a>
+        </div>
       </div>
 
       <aside class="map-sidebar">
         <div class="search-box compact">
-          <label class="tag" for="map-search"><Search size={14} aria-hidden="true" /> 地图筛选</label>
-          <input id="map-search" class="filter-input" type="search" data-map-search placeholder="搜索海域、湖泊、河流、钓鱼、采集" />
+          <label class="tag" for="map-search"><Search size={14} aria-hidden="true" /> <span data-i18n="maps.filter.label">地图筛选</span></label>
+          <input id="map-search" class="filter-input" type="search" data-map-search data-i18n-placeholder="maps.filter.placeholder" placeholder="搜索海域、湖泊、河流、钓鱼、采集" />
           <div class="map-filters" data-map-filters>
-            {['全部', '海域', '湖泊', '河流', '功能区'].map((type) => <button type="button" class="tag" data-map-filter={type}>{type}</button>)}
+            {[
+              { label: '全部', key: 'maps.filter.all' },
+              { label: '海域', key: 'maps.filter.sea' },
+              { label: '湖泊', key: 'maps.filter.lake' },
+              { label: '河流', key: 'maps.filter.river' },
+              { label: '功能区', key: 'maps.filter.town' }
+            ].map((type) => <button type="button" class="tag" data-map-filter={type.label} data-i18n={type.key}>{type.label}</button>)}
           </div>
         </div>
         <div class="soft-band">
-          <h2>读图方式</h2>
+          <h2 data-i18n="maps.read.title">读图方式</h2>
           <ul class="checklist">
-            <li>绿色是功能区，蓝色是海域，青色是湖泊，浅蓝线是河流。</li>
-            <li>点击地图点位可以跳到对应区域卡片。</li>
-            <li>点位位置为路线示意，实际位置以游戏内地图为准。</li>
+            <li data-i18n="maps.read.item.1">绿色是功能区，蓝色是海域，青色是湖泊，浅蓝线是河流。</li>
+            <li data-i18n="maps.read.item.2">拖动地图查看区域，使用 + / - 或滚轮缩放。</li>
+            <li data-i18n="maps.read.item.3">点击地图点位可以查看说明，并跳到对应区域卡片。</li>
+            <li data-i18n="maps.read.item.4">点位位置为路线示意，实际位置以游戏内地图为准。</li>
           </ul>
         </div>
       </aside>
@@ -66,8 +92,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <div class="section-head">
       <div>
         <span class="eyebrow"><Fish size={16} aria-hidden="true" /> Zones</span>
-        <h2>区域资料卡</h2>
-        <p>按海域、湖泊、河流和功能区整理，适合查钓鱼、采集和活动路线。</p>
+        <h2 data-i18n="maps.zones.title">区域资料卡</h2>
+        <p data-i18n="maps.zones.lead">按海域、湖泊、河流和功能区整理，适合查钓鱼、采集和活动路线。</p>
       </div>
     </div>
     <div class="zone-grid" data-map-zone-list>
@@ -82,10 +108,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
             <div class="caption-row">
               {zone.focus.map((item) => <span class="tag">{item}</span>)}
             </div>
-            <p><strong>跑图提示：</strong>{zone.routeTip}</p>
+            <p><strong data-i18n="maps.route.tipLabel">跑图提示：</strong>{zone.routeTip}</p>
             <div class="card-meta">
               <span>{zone.status}</span>
-              <a href={zone.sourceUrl} target="_blank" rel="noreferrer">参考</a>
+              <a href={zone.sourceUrl} target="_blank" rel="noreferrer" data-i18n="guide.reference">参考</a>
             </div>
           </article>
         ))
@@ -97,8 +123,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <div class="section-head">
       <div>
         <span class="eyebrow"><Route size={16} aria-hidden="true" /> Routes</span>
-        <h2>推荐跑图路线</h2>
-        <p>先按目标拆路线，而不是无脑绕全图。这样更适合轻量攻略站，也方便以后做成可勾选工具。</p>
+        <h2 data-i18n="maps.routes.title">推荐跑图路线</h2>
+        <p data-i18n="maps.routes.lead">按目标选择短路线，钓鱼、采集、活动各走一条线，时间更清楚。</p>
       </div>
     </div>
     <div class="grid two">
@@ -119,22 +145,42 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   <section class="section">
     <div class="soft-band">
-      <h2>参考资料</h2>
-      <p>路线图用于快速导航，具体位置和活动时间以游戏内显示为准。</p>
+      <h2 data-i18n="sources.title">参考资料</h2>
+      <p data-i18n="maps.sources.lead">路线图用于快速导航，具体位置和活动时间以游戏内显示为准。</p>
       <div class="footer-links">
         {mapSourceLinks.map((link) => <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>)}
       </div>
     </div>
   </section>
-</BaseLayout>
 
-<script is:inline>
-  (() => {
+  <script is:inline>
+    (() => {
     const input = document.querySelector('[data-map-search]');
     const zones = Array.from(document.querySelectorAll('[data-map-zone]'));
     const pins = Array.from(document.querySelectorAll('[data-map-pin]'));
     const filters = Array.from(document.querySelectorAll('[data-map-filter]'));
+    const viewport = document.querySelector('[data-map-viewport]');
+    const stage = document.querySelector('[data-map-stage]');
+    const detail = document.querySelector('[data-map-detail]');
+    const detailTitle = document.querySelector('[data-map-detail-title]');
+    const detailSummary = document.querySelector('[data-map-detail-summary]');
+    const detailTip = document.querySelector('[data-map-detail-tip]');
+    const trackLink = document.querySelector('[data-map-track]');
+    let scale = 1;
+    let x = 0;
+    let y = 0;
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
     let currentType = '全部';
+    let selectedPin = null;
+    const renderTransform = () => {
+      if (stage) stage.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+    };
+    const zoom = (nextScale) => {
+      scale = Math.min(1.8, Math.max(0.8, nextScale));
+      renderTransform();
+    };
 
     const update = () => {
       const keyword = input?.value.trim().toLowerCase() ?? '';
@@ -156,6 +202,60 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         update();
       });
     });
+    document.querySelector('[data-map-zoom="in"]')?.addEventListener('click', () => {
+      zoom(scale + 0.15);
+    });
+    document.querySelector('[data-map-zoom="out"]')?.addEventListener('click', () => {
+      zoom(scale - 0.15);
+    });
+    document.querySelector('[data-map-reset]')?.addEventListener('click', () => {
+      scale = 1;
+      x = 0;
+      y = 0;
+      renderTransform();
+    });
+    viewport?.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      zoom(scale + (event.deltaY < 0 ? 0.08 : -0.08));
+    }, { passive: false });
+    viewport?.addEventListener('pointerdown', (event) => {
+      if (event.target.closest('[data-map-pin]')) return;
+      dragging = true;
+      startX = event.clientX - x;
+      startY = event.clientY - y;
+      viewport.setPointerCapture(event.pointerId);
+    });
+    viewport?.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      x = event.clientX - startX;
+      y = event.clientY - startY;
+      renderTransform();
+    });
+    viewport?.addEventListener('pointerup', () => {
+      dragging = false;
+    });
+    viewport?.addEventListener('pointercancel', () => {
+      dragging = false;
+    });
+    pins.forEach((pin) => {
+      pin.addEventListener('click', () => {
+        const id = pin.getAttribute('data-zone-id');
+        selectedPin?.classList.remove('is-selected');
+        selectedPin = pin;
+        selectedPin.classList.add('is-selected');
+        if (detail && detailTitle && detailSummary && detailTip) {
+          detail.hidden = false;
+          detail.dataset.zoneName = pin.getAttribute('data-zone-name') || '';
+          detailTitle.textContent = pin.getAttribute('data-zone-name') || '';
+          detailSummary.textContent = pin.getAttribute('data-zone-summary') || '';
+          detailTip.textContent = pin.getAttribute('data-zone-tip') || '';
+          if (trackLink) trackLink.href = `/tracker/?add=${encodeURIComponent(detail.dataset.zoneName)}`;
+        }
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
     update();
-  })();
-</script>
+    renderTransform();
+    })();
+  </script>
+</BaseLayout>

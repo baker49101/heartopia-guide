@@ -39,10 +39,9 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
       </div>
     </div>
   </section>
-</BaseLayout>
 
-<script is:inline>
-  (() => {
+  <script is:inline>
+    (() => {
     const root = document.querySelector('[data-admin-dashboard]');
     if (!root) return;
     const apiBase = root.getAttribute('data-api-base');
@@ -83,5 +82,6 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
 
     load();
     setInterval(load, 30000);
-  })();
-</script>
+    })();
+  </script>
+</BaseLayout>

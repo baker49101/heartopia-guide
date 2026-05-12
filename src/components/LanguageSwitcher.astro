@@ -1,0 +1,60 @@
+---
+import { Globe2 } from '@lucide/astro';
+import { defaultLanguage, languages } from '../i18n/ui';
+---
+
+<div class="language-switcher" data-language-switcher>
+  <button class="language-button" type="button" data-language-button aria-haspopup="true" aria-expanded="false">
+    <Globe2 size={16} aria-hidden="true" />
+    <span data-language-current>{languages.find((item) => item.code === defaultLanguage)?.shortLabel}</span>
+  </button>
+  <div class="language-menu" data-language-menu hidden>
+    {
+      languages.map((language) => (
+        <button type="button" data-language-option={language.code}>
+          {language.label}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-language-switcher]');
+    if (!root) return;
+    const button = root.querySelector('[data-language-button]');
+    const menu = root.querySelector('[data-language-menu]');
+    const options = root.querySelectorAll('[data-language-option]');
+
+    const close = () => {
+      menu.hidden = true;
+      button.setAttribute('aria-expanded', 'false');
+    };
+
+    button.addEventListener('click', () => {
+      const next = !menu.hidden;
+      menu.hidden = next;
+      button.setAttribute('aria-expanded', String(!next));
+    });
+
+    options.forEach((option) => {
+      option.addEventListener('click', () => {
+        const language = option.getAttribute('data-language-option');
+        document.dispatchEvent(new CustomEvent('heartopia:language-change', { detail: { language } }));
+        close();
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!root.contains(event.target)) close();
+    });
+
+    document.addEventListener('heartopia:language-applied', (event) => {
+      const language = event.detail?.language;
+      options.forEach((option) => {
+        option.toggleAttribute('aria-current', option.getAttribute('data-language-option') === language);
+      });
+    });
+  })();
+</script>

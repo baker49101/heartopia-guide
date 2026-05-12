@@ -5,6 +5,7 @@ description: 用地图区域组织开荒、日常采集、天气限定钓鱼和�
 category: 地图
 updatedAt: 2026-05-12
 source: 地图路线整理
+translationKey: map
 ---
 
 ## 跑图的核心原则

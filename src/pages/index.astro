@@ -10,29 +10,29 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section class="town-board" data-pagefind-body>
     <div class="hero-panel">
       <span class="eyebrow"><Sprout size={16} aria-hidden="true" /> Heartopia / 心动小镇</span>
-      <h1>把小镇日常整理成一页温柔手账</h1>
-      <p class="lead">
+      <h1 data-i18n="home.hero.title">把小镇日常整理成一页温柔手账</h1>
+      <p class="lead" data-i18n="home.hero.lead">
         查路线、看地图、补图鉴、追活动。用更短的路径，把每天的小镇生活安排得轻松一点。
       </p>
       <form class="hero-search" action="/search/" method="get">
         <Search size={20} aria-hidden="true" />
-        <input name="q" type="search" placeholder="搜索鱼类、食谱、NPC、每日清单" />
-        <button class="btn" type="submit">搜索</button>
+        <input name="q" type="search" data-i18n-placeholder="home.search.placeholder" placeholder="搜索鱼类、食谱、NPC、每日清单" />
+        <button class="btn" type="submit" data-i18n="common.search">搜索</button>
       </form>
       <div class="hero-actions">
-        <a class="btn" href="/guides/"><BookOpen size={18} aria-hidden="true" /> 看攻略</a>
-        <a class="btn secondary" href="/database/"><Database size={18} aria-hidden="true" /> 查图鉴</a>
-        <a class="btn secondary" href="/maps/"><Map size={18} aria-hidden="true" /> 看地图</a>
+        <a class="btn" href="/guides/"><BookOpen size={18} aria-hidden="true" /> <span data-i18n="home.action.guides">看攻略</span></a>
+        <a class="btn secondary" href="/database/"><Database size={18} aria-hidden="true" /> <span data-i18n="home.action.database">查图鉴</span></a>
+        <a class="btn secondary" href="/maps/"><Map size={18} aria-hidden="true" /> <span data-i18n="home.action.maps">看地图</span></a>
       </div>
     </div>
     <aside class="image-panel" aria-label="Heartopia 官方视觉">
       <img src={SITE.steamImage} alt="Heartopia 官方 Steam 截图：小镇街边的温暖生活场景" loading="eager" />
       <div class="image-caption">
-        <strong>今日小镇速览</strong>
+        <strong data-i18n="home.snapshot">今日小镇速览</strong>
         <div class="caption-row">
-          <span class="tag">攻略文章 6</span>
-          <span class="tag">图鉴栏目 3</span>
-          <span class="tag">地图区域 13</span>
+          <span class="tag" data-i18n="home.tag.guides">攻略文章 6</span>
+          <span class="tag" data-i18n="home.tag.database">图鉴栏目 15</span>
+          <span class="tag" data-i18n="home.tag.maps">地图区域 13</span>
         </div>
       </div>
     </aside>
@@ -42,8 +42,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="section-head">
       <div>
         <span class="eyebrow">Town Notes</span>
-        <h2>先从这些入口开始</h2>
-        <p>开荒、日常、钓鱼、地图、采集和说明都放在这里，想查什么直接进。</p>
+        <h2 data-i18n="home.start.title">先从这些入口开始</h2>
+        <p data-i18n="home.start.lead">开荒、日常、钓鱼、地图、采集和追踪器都放在这里，想查什么直接进。</p>
       </div>
     </div>
     <div class="grid three">
@@ -56,14 +56,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="section-head">
         <div>
           <span class="eyebrow">Daily</span>
-          <h2>每日小镇便签</h2>
-          <p>上线后先看清单，再决定今天跑图、钓鱼还是拜访居民。</p>
+          <h2 data-i18n="home.daily.title">每日小镇便签</h2>
+          <p data-i18n="home.daily.lead">上线后先看清单，再决定今天跑图、钓鱼还是拜访居民。</p>
         </div>
-        <a class="btn secondary" href="/guides/daily-routine/">打开日常</a>
+        <a class="btn secondary" href="/guides/daily-routine/" data-i18n="home.daily.open">打开日常</a>
       </div>
       <ul class="checklist">
-        {dailyChecklist.map((item) => <li>{item}</li>)}
+        {dailyChecklist.map((item, index) => <li data-i18n={`home.daily.item.${index + 1}`}>{item}</li>)}
       </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="soft-band tracker-teaser">
+      <div>
+        <span class="eyebrow">Tracker</span>
+        <h2 data-i18n="home.tracker.title">今日收集追踪</h2>
+        <p data-i18n="home.tracker.lead">把想补的鱼、食谱、居民和材料加入清单，今天做什么一眼看清。</p>
+      </div>
+      <a class="btn" href="/tracker/" data-i18n="home.tracker.open">打开追踪器</a>
     </div>
   </section>
 
@@ -71,8 +82,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <div class="section-head">
       <div>
         <span class="eyebrow">Database</span>
-        <h2>图鉴资料库</h2>
-        <p>按鱼类、食谱、NPC 三类整理，适合快速查路线和用途。</p>
+        <h2 data-i18n="home.database.title">图鉴资料库</h2>
+        <p data-i18n="home.database.lead">按收集、料理、居民和地图分类整理，适合快速查路线和用途。</p>
       </div>
     </div>
     <div class="grid three">

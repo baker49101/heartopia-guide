@@ -5,6 +5,7 @@ description: 把采集路线、素材分类和背包整理合并成一套轻量�
 category: 采集
 updatedAt: 2026-05-12
 source: Heartopia.live 采集攻略
+translationKey: foraging
 ---
 
 ## 采集不要追求一次清全图

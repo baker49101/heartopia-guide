@@ -5,6 +5,7 @@ description: 用最少的步骤建立探索节奏，先熟悉 Heartopia 的小�
 category: 新手
 updatedAt: 2026-05-12
 source: Steam 官方介绍
+translationKey: beginner
 ---
 
 ## 第一步：先确认目标

@@ -1,0 +1,89 @@
+---
+import { ClipboardCheck, Plus, Trash2 } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="追踪器 | 心动小镇攻略手账" description="Heartopia / 心动小镇收集追踪器。">
+  <section class="content-shell" data-pagefind-body>
+    <span class="eyebrow"><ClipboardCheck size={16} aria-hidden="true" /> Tracker</span>
+    <h1 data-i18n="tracker.title">小镇收集追踪器</h1>
+    <p class="lead" data-i18n="tracker.lead">把今天想补的鱼、料理、居民和材料放进清单。勾选记录只保存在你的浏览器里。</p>
+  </section>
+
+  <section class="section tracker-shell" data-tracker>
+    <form class="hero-search" data-tracker-form>
+      <Plus size={18} aria-hidden="true" />
+      <input data-tracker-input data-i18n-placeholder="tracker.placeholder" placeholder="输入想追踪的目标" />
+      <button class="btn" type="submit" data-i18n="tracker.add">添加</button>
+    </form>
+    <div class="tracker-list" data-tracker-list></div>
+    <p class="lead tracker-empty" data-tracker-empty data-i18n="tracker.empty">今天还没有追踪目标。</p>
+  </section>
+
+  <script is:inline>
+    (() => {
+    const key = 'heartopia.tracker.items';
+    const form = document.querySelector('[data-tracker-form]');
+    const input = document.querySelector('[data-tracker-input]');
+    const list = document.querySelector('[data-tracker-list]');
+    const empty = document.querySelector('[data-tracker-empty]');
+    if (!form || !input || !list || !empty) return;
+
+    const read = () => {
+      try {
+        return JSON.parse(localStorage.getItem(key) || '[]');
+      } catch {
+        return [];
+      }
+    };
+    const write = (items) => localStorage.setItem(key, JSON.stringify(items));
+    const addFromUrl = () => {
+      const params = new URLSearchParams(location.search);
+      const text = params.get('add')?.trim();
+      if (!text) return;
+      const items = read();
+      if (!items.some((item) => item.text === text)) {
+        items.push({ text, done: false });
+        write(items);
+      }
+      history.replaceState(null, '', location.pathname);
+    };
+    const render = () => {
+      const items = read();
+      list.innerHTML = '';
+      empty.hidden = items.length > 0;
+      items.forEach((item, index) => {
+        const row = document.createElement('label');
+        row.className = 'tracker-item';
+        row.innerHTML = `<input type="checkbox" ${item.done ? 'checked' : ''} /><span>${item.text}</span><button type="button" aria-label="Remove"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>`;
+        row.querySelector('input').addEventListener('change', (event) => {
+          const next = read();
+          next[index].done = event.target.checked;
+          write(next);
+          render();
+        });
+        row.querySelector('button').addEventListener('click', () => {
+          const next = read();
+          next.splice(index, 1);
+          write(next);
+          render();
+        });
+        list.append(row);
+      });
+    };
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      const items = read();
+      items.push({ text, done: false });
+      write(items);
+      input.value = '';
+      render();
+    });
+    addFromUrl();
+    render();
+    })();
+  </script>
+</BaseLayout>

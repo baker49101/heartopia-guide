@@ -6,7 +6,10 @@ const modules = import.meta.glob('./*.md', { eager: true });
 const guides = Object.values(modules)
   .map((module: any) => ({
     ...module.frontmatter,
-    href: module.url
+    href: module.url,
+    titleKey: module.frontmatter.titleKey ?? `guide.${module.frontmatter.translationKey}.title`,
+    descriptionKey: module.frontmatter.descriptionKey ?? `guide.${module.frontmatter.translationKey}.desc`,
+    labelKey: module.frontmatter.labelKey ?? `guide.label.${module.frontmatter.translationKey}`
   }))
   .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
 ---
@@ -14,8 +17,8 @@ const guides = Object.values(modules)
 <BaseLayout title="攻略 | 心动小镇攻略手账" description="Heartopia / 心动小镇攻略文章列表。">
   <section class="content-shell" data-pagefind-body>
     <span class="eyebrow">Guides</span>
-    <h1>攻略手账</h1>
-    <p class="lead">从开荒、日常、地图、钓鱼和采集开始，按目标快速进入对应攻略。</p>
+    <h1 data-i18n="guides.title">攻略手账</h1>
+    <p class="lead" data-i18n="guides.lead">从开荒、日常、地图、钓鱼和采集开始，按目标快速进入对应攻略。</p>
   </section>
   <section class="section">
     <div class="grid three">
@@ -26,6 +29,9 @@ const guides = Object.values(modules)
             description={guide.description}
             href={guide.href}
             label={guide.category}
+            titleKey={guide.titleKey}
+            descriptionKey={guide.descriptionKey}
+            labelKey={guide.labelKey}
           />
         ))
       }

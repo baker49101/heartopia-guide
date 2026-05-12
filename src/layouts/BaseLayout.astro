@@ -1,6 +1,8 @@
 ---
-import { BookOpen, CalendarDays, Database, Home, Map, Search } from '@lucide/astro';
+import { BookOpen, CalendarDays, ClipboardCheck, Database, Home, Map, Search } from '@lucide/astro';
 import AnalyticsClient from '../components/AnalyticsClient.astro';
+import I18nClient from '../components/I18nClient.astro';
+import LanguageSwitcher from '../components/LanguageSwitcher.astro';
 import OnlineBeacon from '../components/OnlineBeacon.astro';
 import { SITE, SOURCE_NOTICE } from '../data/site';
 import '../styles/global.css';
@@ -34,38 +36,42 @@ const isCurrent = (href: string) =>
     <title>{title}</title>
   </head>
   <body>
-    <a class="skip-link" href="#content">跳到正文</a>
+    <a class="skip-link" href="#content" data-i18n="common.skip">跳到正文</a>
     <header class="site-header">
       <div class="header-inner">
         <a class="brand" href="/">
           <span class="brand-mark" aria-hidden="true"><Home size={20} /></span>
           <span>
-            {SITE.name}
-            <small>{SITE.englishName}</small>
+            <span data-i18n="site.name">{SITE.name}</span>
+            <small data-i18n="site.subtitle">{SITE.englishName}</small>
           </span>
         </a>
-        <nav class="main-nav" aria-label="主导航">
+        <nav class="main-nav" aria-label="主导航" data-i18n-aria="nav.aria">
           <a class="nav-link" href="/" aria-current={isCurrent('/') ? 'page' : undefined}>
-            <Home size={17} aria-hidden="true" /> 首页
+            <Home size={17} aria-hidden="true" /> <span data-i18n="nav.home">首页</span>
           </a>
           <a class="nav-link" href="/guides/" aria-current={isCurrent('/guides/') ? 'page' : undefined}>
-            <BookOpen size={17} aria-hidden="true" /> 攻略
+            <BookOpen size={17} aria-hidden="true" /> <span data-i18n="nav.guides">攻略</span>
           </a>
           <a class="nav-link" href="/database/" aria-current={isCurrent('/database/') ? 'page' : undefined}>
-            <Database size={17} aria-hidden="true" /> 图鉴
+            <Database size={17} aria-hidden="true" /> <span data-i18n="nav.database">图鉴</span>
           </a>
           <a class="nav-link" href="/activities/" aria-current={isCurrent('/activities/') ? 'page' : undefined}>
-            <CalendarDays size={17} aria-hidden="true" /> 活动
+            <CalendarDays size={17} aria-hidden="true" /> <span data-i18n="nav.activities">活动</span>
           </a>
           <a class="nav-link" href="/maps/" aria-current={isCurrent('/maps/') ? 'page' : undefined}>
-            <Map size={17} aria-hidden="true" /> 地图
+            <Map size={17} aria-hidden="true" /> <span data-i18n="nav.maps">地图</span>
+          </a>
+          <a class="nav-link" href="/tracker/" aria-current={isCurrent('/tracker/') ? 'page' : undefined}>
+            <ClipboardCheck size={17} aria-hidden="true" /> <span data-i18n="nav.tracker">追踪器</span>
           </a>
           <a class="nav-link" href="/search/" aria-current={isCurrent('/search/') ? 'page' : undefined}>
-            <Search size={17} aria-hidden="true" /> 搜索
+            <Search size={17} aria-hidden="true" /> <span data-i18n="nav.search">搜索</span>
           </a>
         </nav>
         <div class="header-actions">
           <OnlineBeacon />
+          <LanguageSwitcher />
         </div>
       </div>
     </header>
@@ -74,13 +80,14 @@ const isCurrent = (href: string) =>
     </main>
     <footer class="site-footer">
       <div class="footer-inner">
-        <p>{SOURCE_NOTICE}</p>
+        <p data-i18n="footer.notice">{SOURCE_NOTICE}</p>
         <div class="footer-links">
-          <a href="/sources/">参考资料</a>
+          <a href="/sources/" data-i18n="footer.sources">参考资料</a>
           {SITE.officialLinks.map((link) => <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>)}
         </div>
       </div>
     </footer>
+    <I18nClient />
     <AnalyticsClient />
   </body>
 </html>

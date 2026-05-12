@@ -5,6 +5,7 @@ description: 按海域、湖泊、河流三类水域规划 Heartopia / 心动小
 category: 钓鱼
 updatedAt: 2026-05-12
 source: 玩一玩鱼类分布图 + TapTap 鱼类观察
+translationKey: fishing
 ---
 
 ## 先把水域分成三类

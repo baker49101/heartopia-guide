@@ -1,0 +1,70 @@
+---
+import { guideTranslations } from '../i18n/guides';
+import { defaultLanguage, languages, ui } from '../i18n/ui';
+---
+
+<script is:inline define:vars={{ defaultLanguage, languages, ui, guideTranslations }}>
+  (() => {
+    const storageKey = 'heartopia.language';
+    const languageCodes = languages.map((language) => language.code);
+
+    const normalize = (value) => (languageCodes.includes(value) ? value : defaultLanguage);
+
+    const getLanguage = () => {
+      const fromUrl = new URLSearchParams(location.search).get('lang');
+      const fromStorage = localStorage.getItem(storageKey);
+      return normalize(fromUrl || fromStorage || defaultLanguage);
+    };
+
+    const applyLanguage = (language) => {
+      const lang = normalize(language);
+      const dictionary = ui[lang] || ui[defaultLanguage];
+      const meta = languages.find((item) => item.code === lang) || languages[0];
+
+      localStorage.setItem(storageKey, lang);
+      document.documentElement.lang = meta.htmlLang;
+      document.documentElement.dataset.language = lang;
+
+      document.querySelectorAll('[data-i18n]').forEach((node) => {
+        const key = node.getAttribute('data-i18n');
+        if (key && dictionary[key]) node.textContent = dictionary[key];
+      });
+
+      document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => {
+        const key = node.getAttribute('data-i18n-placeholder');
+        if (key && dictionary[key]) node.setAttribute('placeholder', dictionary[key]);
+      });
+
+      document.querySelectorAll('[data-i18n-aria]').forEach((node) => {
+        const key = node.getAttribute('data-i18n-aria');
+        if (key && dictionary[key]) node.setAttribute('aria-label', dictionary[key]);
+      });
+
+      document.querySelectorAll('[data-language-current]').forEach((node) => {
+        node.textContent = meta.shortLabel;
+      });
+
+      document.querySelectorAll('[data-guide-key]').forEach((article) => {
+        const key = article.getAttribute('data-guide-key');
+        const copy = guideTranslations[key]?.[lang] || guideTranslations[key]?.[defaultLanguage];
+        if (!copy) return;
+        const category = article.querySelector('[data-guide-category]');
+        const title = article.querySelector('[data-guide-title]');
+        const description = article.querySelector('[data-guide-description]');
+        const source = article.querySelector('[data-guide-source]');
+        const body = article.querySelector('[data-guide-body]');
+        if (category) category.textContent = copy.category;
+        if (title) title.textContent = copy.title;
+        if (description) description.textContent = copy.description;
+        if (source) source.textContent = copy.source;
+        if (body) body.innerHTML = copy.html;
+      });
+
+      document.dispatchEvent(new CustomEvent('heartopia:language-applied', { detail: { language: lang, dictionary } }));
+    };
+
+    window.heartopiaI18n = { applyLanguage, getLanguage, ui };
+    document.addEventListener('heartopia:language-change', (event) => applyLanguage(event.detail?.language));
+    applyLanguage(getLanguage());
+  })();
+</script>
