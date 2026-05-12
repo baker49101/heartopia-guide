@@ -1,0 +1,18 @@
+---
+import { SITE } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="资料来源 | 心动小镇攻略手账" description="Heartopia 攻略站资料来源与核验说明。">
+  <section class="content-shell" data-pagefind-body>
+    <span class="eyebrow">Sources</span>
+    <h1>资料来源</h1>
+    <p class="lead">本站优先使用官方与平台公开信息；社区资料只作为待核验参考。</p>
+    <div class="soft-band">
+      <h2>官方与平台链接</h2>
+      <ul class="checklist">
+        {SITE.officialLinks.map((link) => <li><a href={link.href} target="_blank" rel="noreferrer">{link.label}</a></li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

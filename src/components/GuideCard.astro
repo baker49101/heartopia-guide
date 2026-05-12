@@ -1,0 +1,22 @@
+---
+import { ArrowRight } from '@lucide/astro';
+
+type Props = {
+  title: string;
+  description: string;
+  href: string;
+  label?: string;
+};
+
+const { title, description, href, label = 'Guide' } = Astro.props;
+---
+
+<a class="card" href={href}>
+  <span class="tag">{label}</span>
+  <h3>{title}</h3>
+  <p>{description}</p>
+  <span class="card-meta">
+    <span>打开手账</span>
+    <ArrowRight size={18} aria-hidden="true" />
+  </span>
+</a>

@@ -1,0 +1,75 @@
+---
+const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
+---
+
+<div class="online-beacon is-waiting" data-online-beacon data-api-base={apiBase} aria-live="polite">
+  <span class="online-dot" aria-hidden="true"></span>
+  <span data-online-label>在线统计待接入</span>
+</div>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-online-beacon]');
+    if (!root) return;
+
+    const label = root.querySelector('[data-online-label]');
+    const apiBase = root.getAttribute('data-api-base');
+    const api = apiBase ? apiBase.replace(/\/$/, '') : '';
+
+    const setWaiting = (text) => {
+      root.classList.remove('is-live');
+      root.classList.add('is-waiting');
+      label.textContent = text;
+    };
+
+    const setLive = (count) => {
+      root.classList.remove('is-waiting');
+      root.classList.add('is-live');
+      label.textContent = `${count} 位镇民在线`;
+    };
+
+    if (!api) {
+      setWaiting('小镇灯塔待接入');
+      return;
+    }
+
+    const visitorKey = 'heartopia.visitorId';
+    let visitorId = localStorage.getItem(visitorKey);
+    if (!visitorId) {
+      visitorId =
+        window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem(visitorKey, visitorId);
+    }
+
+    const heartbeat = async () => {
+      try {
+        await fetch(`${api}/online/heartbeat`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ visitorId, path: location.pathname })
+        });
+      } catch {
+        setWaiting('小镇灯塔连接中');
+      }
+    };
+
+    const refresh = async () => {
+      try {
+        const response = await fetch(`${api}/online`, { cache: 'no-store' });
+        if (!response.ok) throw new Error('online request failed');
+        const data = await response.json();
+        const count = Number(data.online);
+        if (Number.isFinite(count)) setLive(count);
+      } catch {
+        setWaiting('小镇灯塔连接中');
+      }
+    };
+
+    heartbeat();
+    refresh();
+    setInterval(heartbeat, 30000);
+    setInterval(refresh, 30000);
+  })();
+</script>

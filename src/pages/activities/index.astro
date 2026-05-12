@@ -1,0 +1,21 @@
+---
+import { CalendarDays } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="活动 | 心动小镇攻略手账" description="Heartopia / 心动小镇活动记录。">
+  <section class="content-shell" data-pagefind-body>
+    <span class="eyebrow"><CalendarDays size={16} aria-hidden="true" /> Events</span>
+    <h1>活动记录</h1>
+    <p class="lead">这里会整理官方公告、限时活动、兑换信息和版本变化。首版只保留结构，避免填入未经核验的活动时间。</p>
+    <div class="soft-band">
+      <h2>活动条目模板</h2>
+      <ul class="checklist">
+        <li>活动名称、开始时间、结束时间</li>
+        <li>入口位置、任务流程、奖励列表</li>
+        <li>官方公告链接、截图或实测来源</li>
+        <li>版本号与最后核验日期</li>
+      </ul>
+    </div>
+  </section>
+</BaseLayout>

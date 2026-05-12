@@ -1,0 +1,81 @@
+---
+import { BookOpen, Database, Search, Sprout } from '@lucide/astro';
+import GuideCard from '../components/GuideCard.astro';
+import { dailyChecklist, databaseSections, quickEntries } from '../data/home';
+import { SITE } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <section class="town-board" data-pagefind-body>
+    <div class="hero-panel">
+      <span class="eyebrow"><Sprout size={16} aria-hidden="true" /> Heartopia / 心动小镇</span>
+      <h1>把小镇日常整理成一页温柔手账</h1>
+      <p class="lead">
+        这里会沉淀攻略路线、图鉴数据、活动记录和在线小绿灯。首版先做轻量静态站，资料逐条核验后再进入正式图鉴。
+      </p>
+      <form class="hero-search" action="/search/" method="get">
+        <Search size={20} aria-hidden="true" />
+        <input name="q" type="search" placeholder="搜索鱼类、食谱、NPC、每日清单" />
+        <button class="btn" type="submit">搜索</button>
+      </form>
+      <div class="hero-actions">
+        <a class="btn" href="/guides/"><BookOpen size={18} aria-hidden="true" /> 看攻略</a>
+        <a class="btn secondary" href="/database/"><Database size={18} aria-hidden="true" /> 查图鉴</a>
+      </div>
+    </div>
+    <aside class="image-panel" aria-label="Heartopia 官方视觉">
+      <img src={SITE.steamImage} alt="Heartopia 官方 Steam 截图：小镇街边的温暖生活场景" loading="eager" />
+      <div class="image-caption">
+        <strong>今日小镇速览</strong>
+        <div class="caption-row">
+          <span class="tag">攻略草稿 3</span>
+          <span class="tag">图鉴栏目 3</span>
+          <span class="tag">在线灯塔预留</span>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Town Notes</span>
+        <h2>先从这些入口开始</h2>
+        <p>首页保留最短路径：开荒、日常、核验、图鉴。之后补资料时，不需要重新设计页面。</p>
+      </div>
+    </div>
+    <div class="grid three">
+      {quickEntries.map((entry) => <GuideCard {...entry} />)}
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="soft-band">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Daily</span>
+          <h2>每日小镇便签</h2>
+          <p>用短清单承接“今天上线先做什么”，后续可以接成本地勾选工具。</p>
+        </div>
+        <a class="btn secondary" href="/guides/daily-routine/">打开日常</a>
+      </div>
+      <ul class="checklist">
+        {dailyChecklist.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Database</span>
+        <h2>图鉴资料库</h2>
+        <p>先按玩家最常查的类别搭数据结构：鱼类、食谱、NPC。每条记录都会保留来源和核验日期。</p>
+      </div>
+    </div>
+    <div class="grid three">
+      {databaseSections.map((entry) => <GuideCard {...entry} />)}
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import { Map } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="地图 | 心动小镇攻略手账" description="Heartopia / 心动小镇地图资源与路线。">
+  <section class="content-shell" data-pagefind-body>
+    <span class="eyebrow"><Map size={16} aria-hidden="true" /> Maps</span>
+    <h1>地图与路线</h1>
+    <p class="lead">地图页先承载资源点、采集路线、钓鱼水域和活动入口。后续可以升级为可筛选地图。</p>
+    <div class="grid two">
+      <div class="card">
+        <span class="tag">采集路线</span>
+        <h3>日常资源跑图</h3>
+        <p>用于记录高频材料刷新点和路线耗时。</p>
+      </div>
+      <div class="card">
+        <span class="tag">兴趣玩法</span>
+        <h3>钓鱼与观鸟点位</h3>
+        <p>用于记录水域、时间、天气和出现条件。</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

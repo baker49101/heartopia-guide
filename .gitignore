@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.astro-preview.log
+.astro-preview.err.log
+.env
+.env.*
+workers/wrangler.toml
+npm-debug.log*

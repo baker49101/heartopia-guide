@@ -1,0 +1,52 @@
+---
+import { Search } from '@lucide/astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="搜索 | 心动小镇攻略手账" description="搜索 Heartopia / 心动小镇攻略与图鉴。">
+  <section class="content-shell" data-pagefind-body>
+    <span class="eyebrow"><Search size={16} aria-hidden="true" /> Search</span>
+    <h1>搜索小镇手账</h1>
+    <p class="lead">构建发布后会生成全文搜索索引，适合快速查攻略、图鉴和活动。</p>
+    <div class="search-box">
+      <div id="search"></div>
+      <p id="search-fallback">搜索索引会在执行 `npm run build` 后生成。</p>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const fallback = document.querySelector('#search-fallback');
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q') ?? '';
+
+  try {
+    const stylesheet = document.createElement('link');
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/pagefind/pagefind-ui.css';
+    document.head.append(stylesheet);
+
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/pagefind/pagefind-ui.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Pagefind UI failed to load'));
+      document.head.append(script);
+    });
+
+    new window.PagefindUI({
+      element: '#search',
+      showSubResults: true
+    });
+    if (fallback) fallback.remove();
+    if (q) {
+      const input = document.querySelector('.pagefind-ui__search-input') as HTMLInputElement | null;
+      if (input) {
+        input.value = q;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }
+  } catch {
+    if (fallback) fallback.textContent = '开发环境下暂未加载搜索索引，构建发布后可用。';
+  }
+</script>

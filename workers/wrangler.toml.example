@@ -1,0 +1,8 @@
+name = "heartopia-analytics"
+main = "analytics-worker.js"
+compatibility_date = "2026-05-12"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "heartopia_analytics"
+database_id = "replace-with-your-d1-database-id"

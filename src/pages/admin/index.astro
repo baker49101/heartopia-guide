@@ -1,0 +1,89 @@
+---
+import { BarChart3, RadioTower } from '@lucide/astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
+---
+
+<BaseLayout title="后台 | 心动小镇攻略手账" description="查看 Heartopia 攻略站今日访问和在线人数。" robots="noindex, nofollow">
+  <section class="content-shell" data-pagefind-body>
+    <span class="eyebrow"><BarChart3 size={16} aria-hidden="true" /> Admin</span>
+    <h1>小镇后台</h1>
+    <p class="lead">这里读取统计 API 的今日访问、访客、热门页面和当前在线人数。未配置 API 时，页面会保持静态占位。</p>
+  </section>
+
+  <section class="section" data-admin-dashboard data-api-base={apiBase}>
+    <div class="grid three">
+      <div class="card admin-metric">
+        <span class="tag">今日浏览</span>
+        <strong class="metric-value" data-metric="pageviews">--</strong>
+        <p>当日页面浏览量</p>
+      </div>
+      <div class="card admin-metric">
+        <span class="tag">今日访客</span>
+        <strong class="metric-value" data-metric="visitors">--</strong>
+        <p>按匿名访客标识去重</p>
+      </div>
+      <div class="card admin-metric">
+        <span class="tag"><RadioTower size={14} aria-hidden="true" /> 在线</span>
+        <strong class="metric-value" data-metric="online">--</strong>
+        <p>最近 2 分钟有心跳的访客</p>
+      </div>
+    </div>
+    <div class="section">
+      <div class="soft-band">
+        <h2>热门页面</h2>
+        <ul class="checklist" data-top-pages>
+          <li>统计 API 接入后显示今日热门页面。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  (() => {
+    const root = document.querySelector('[data-admin-dashboard]');
+    if (!root) return;
+    const apiBase = root.getAttribute('data-api-base');
+    const api = apiBase ? apiBase.replace(/\/$/, '') : '';
+    const setText = (name, value) => {
+      const node = root.querySelector(`[data-metric="${name}"]`);
+      if (node) node.textContent = String(value);
+    };
+    const topPages = root.querySelector('[data-top-pages]');
+
+    if (!api) {
+      if (topPages) {
+        topPages.innerHTML = '<li>设置 PUBLIC_ANALYTICS_API_BASE 后，这里会读取真实统计。</li>';
+      }
+      return;
+    }
+
+    const load = async () => {
+      try {
+        const [todayResponse, onlineResponse] = await Promise.all([
+          fetch(`${api}/stats/today`, { cache: 'no-store' }),
+          fetch(`${api}/online`, { cache: 'no-store' })
+        ]);
+        const today = await todayResponse.json();
+        const online = await onlineResponse.json();
+        setText('pageviews', today.pageviews ?? 0);
+        setText('visitors', today.visitors ?? 0);
+        setText('online', online.online ?? 0);
+        if (topPages) {
+          const pages = Array.isArray(today.topPages) ? today.topPages : [];
+          topPages.innerHTML =
+            pages.length > 0
+              ? pages.map((page) => `<li>${page.path} · ${page.views} 次</li>`).join('')
+              : '<li>今天还没有页面浏览记录。</li>';
+        }
+      } catch {
+        if (topPages) topPages.innerHTML = '<li>统计 API 暂时不可用，请稍后刷新。</li>';
+      }
+    };
+
+    load();
+    setInterval(load, 30000);
+  })();
+</script>

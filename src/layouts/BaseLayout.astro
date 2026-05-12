@@ -1,0 +1,86 @@
+---
+import { BookOpen, CalendarDays, Database, Home, Map, Search } from '@lucide/astro';
+import AnalyticsClient from '../components/AnalyticsClient.astro';
+import OnlineBeacon from '../components/OnlineBeacon.astro';
+import { SITE, SOURCE_NOTICE } from '../data/site';
+import '../styles/global.css';
+
+type Props = {
+  title?: string;
+  description?: string;
+  robots?: string;
+};
+
+const { title = SITE.name, description = SITE.description, robots } = Astro.props;
+const pathname = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href === '/' ? pathname === '/' : pathname.startsWith(href);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url.href} />
+    <meta property="og:image" content={SITE.steamImage} />
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">跳到正文</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="/">
+          <span class="brand-mark" aria-hidden="true"><Home size={20} /></span>
+          <span>
+            {SITE.name}
+            <small>{SITE.englishName}</small>
+          </span>
+        </a>
+        <nav class="main-nav" aria-label="主导航">
+          <a class="nav-link" href="/" aria-current={isCurrent('/') ? 'page' : undefined}>
+            <Home size={17} aria-hidden="true" /> 首页
+          </a>
+          <a class="nav-link" href="/guides/" aria-current={isCurrent('/guides/') ? 'page' : undefined}>
+            <BookOpen size={17} aria-hidden="true" /> 攻略
+          </a>
+          <a class="nav-link" href="/database/" aria-current={isCurrent('/database/') ? 'page' : undefined}>
+            <Database size={17} aria-hidden="true" /> 图鉴
+          </a>
+          <a class="nav-link" href="/activities/" aria-current={isCurrent('/activities/') ? 'page' : undefined}>
+            <CalendarDays size={17} aria-hidden="true" /> 活动
+          </a>
+          <a class="nav-link" href="/maps/" aria-current={isCurrent('/maps/') ? 'page' : undefined}>
+            <Map size={17} aria-hidden="true" /> 地图
+          </a>
+          <a class="nav-link" href="/search/" aria-current={isCurrent('/search/') ? 'page' : undefined}>
+            <Search size={17} aria-hidden="true" /> 搜索
+          </a>
+        </nav>
+        <div class="header-actions">
+          <OnlineBeacon />
+        </div>
+      </div>
+    </header>
+    <main id="content">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>{SOURCE_NOTICE}</p>
+        <div class="footer-links">
+          <a href="/sources/">资料来源</a>
+          {SITE.officialLinks.map((link) => <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>)}
+        </div>
+      </div>
+    </footer>
+    <AnalyticsClient />
+  </body>
+</html>

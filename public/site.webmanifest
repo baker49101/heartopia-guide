@@ -1,0 +1,9 @@
+{
+  "name": "心动小镇攻略手账",
+  "short_name": "小镇攻略",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff8e8",
+  "theme_color": "#52b776",
+  "lang": "zh-CN"
+}

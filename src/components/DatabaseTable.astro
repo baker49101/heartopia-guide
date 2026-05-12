@@ -1,0 +1,50 @@
+---
+import type { DatabaseEntry } from '../data/database';
+
+type Props = {
+  entries: DatabaseEntry[];
+  searchLabel: string;
+};
+
+const { entries, searchLabel } = Astro.props;
+---
+
+<div class="table-tools">
+  <input class="filter-input" type="search" data-database-filter placeholder={searchLabel} />
+</div>
+<div class="data-table" data-database-table>
+  <div class="data-row header">
+    <div class="data-cell">名称</div>
+    <div class="data-cell">分类</div>
+    <div class="data-cell">地点</div>
+    <div class="data-cell">条件</div>
+    <div class="data-cell">状态</div>
+  </div>
+  {
+    entries.map((entry) => (
+      <div class="data-row" data-database-row data-search={`${entry.name} ${entry.category} ${entry.location} ${entry.condition} ${entry.usage} ${entry.status}`}>
+        <div class="data-cell"><strong>{entry.name}</strong><br />{entry.usage}</div>
+        <div class="data-cell">{entry.category}</div>
+        <div class="data-cell">{entry.location}</div>
+        <div class="data-cell">{entry.condition}<br /><a href={entry.sourceUrl} target="_blank" rel="noreferrer">来源</a> · {entry.verifiedAt}</div>
+        <div class="data-cell"><span class="status-pill">{entry.status}</span></div>
+      </div>
+    ))
+  }
+</div>
+
+<script is:inline>
+  (() => {
+    const input = document.querySelector('[data-database-filter]');
+    const rows = Array.from(document.querySelectorAll('[data-database-row]'));
+    if (!input || rows.length === 0) return;
+
+    input.addEventListener('input', () => {
+      const keyword = input.value.trim().toLowerCase();
+      rows.forEach((row) => {
+        const text = row.getAttribute('data-search')?.toLowerCase() ?? '';
+        row.toggleAttribute('hidden', keyword.length > 0 && !text.includes(keyword));
+      });
+    });
+  })();
+</script>

@@ -1,0 +1,47 @@
+---
+const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
+const cfToken = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
+const umamiId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
+const umamiScript = import.meta.env.PUBLIC_UMAMI_SCRIPT_URL ?? 'https://cloud.umami.is/script.js';
+const cfBeacon = cfToken ? JSON.stringify({ token: cfToken }) : '';
+---
+
+{cfToken && <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon={cfBeacon}></script>}
+{umamiId && <script defer src={umamiScript} data-website-id={umamiId}></script>}
+
+<script is:inline define:vars={{ apiBase }}>
+  (() => {
+    const api = apiBase ? apiBase.replace(/\/$/, '') : '';
+    if (!api) return;
+
+    const visitorKey = 'heartopia.visitorId';
+    let visitorId = localStorage.getItem(visitorKey);
+    if (!visitorId) {
+      visitorId =
+        window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      localStorage.setItem(visitorKey, visitorId);
+    }
+
+    const payload = JSON.stringify({
+      visitorId,
+      path: location.pathname,
+      title: document.title,
+      referrer: document.referrer
+    });
+
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(`${api}/pageview`, blob);
+      return;
+    }
+
+    fetch(`${api}/pageview`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: payload,
+      keepalive: true
+    }).catch(() => {});
+  })();
+</script>
