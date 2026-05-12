@@ -26,7 +26,7 @@ const { entries, searchLabel } = Astro.props;
         <div class="data-cell"><strong>{entry.name}</strong><br />{entry.usage}</div>
         <div class="data-cell">{entry.category}</div>
         <div class="data-cell">{entry.location}</div>
-        <div class="data-cell">{entry.condition}<br /><a href={entry.sourceUrl} target="_blank" rel="noreferrer">来源</a> · {entry.verifiedAt}</div>
+        <div class="data-cell">{entry.condition}<br /><a href={entry.sourceUrl} target="_blank" rel="noreferrer">参考</a> · {entry.verifiedAt}</div>
         <div class="data-cell"><span class="status-pill">{entry.status}</span></div>
       </div>
     ))

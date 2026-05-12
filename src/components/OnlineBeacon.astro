@@ -4,7 +4,7 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
 
 <div class="online-beacon is-waiting" data-online-beacon data-api-base={apiBase} aria-live="polite">
   <span class="online-dot" aria-hidden="true"></span>
-  <span data-online-label>在线统计待接入</span>
+  <span data-online-label>小镇灯塔休息中</span>
 </div>
 
 <script is:inline>
@@ -29,7 +29,7 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
     };
 
     if (!api) {
-      setWaiting('小镇灯塔待接入');
+      setWaiting('小镇灯塔休息中');
       return;
     }
 

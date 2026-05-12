@@ -9,7 +9,7 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
   <section class="content-shell" data-pagefind-body>
     <span class="eyebrow"><BarChart3 size={16} aria-hidden="true" /> Admin</span>
     <h1>小镇后台</h1>
-    <p class="lead">这里读取统计 API 的今日访问、访客、热门页面和当前在线人数。未配置 API 时，页面会保持静态占位。</p>
+    <p class="lead">今日浏览、访客、热门页面和当前在线人数。</p>
   </section>
 
   <section class="section" data-admin-dashboard data-api-base={apiBase}>
@@ -34,7 +34,7 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
       <div class="soft-band">
         <h2>热门页面</h2>
         <ul class="checklist" data-top-pages>
-          <li>统计 API 接入后显示今日热门页面。</li>
+          <li>暂无热门页面。</li>
         </ul>
       </div>
     </div>
@@ -54,9 +54,7 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
     const topPages = root.querySelector('[data-top-pages]');
 
     if (!api) {
-      if (topPages) {
-        topPages.innerHTML = '<li>设置 PUBLIC_ANALYTICS_API_BASE 后，这里会读取真实统计。</li>';
-      }
+      if (topPages) topPages.innerHTML = '<li>暂无数据。</li>';
       return;
     }
 
@@ -79,7 +77,7 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
               : '<li>今天还没有页面浏览记录。</li>';
         }
       } catch {
-        if (topPages) topPages.innerHTML = '<li>统计 API 暂时不可用，请稍后刷新。</li>';
+        if (topPages) topPages.innerHTML = '<li>暂无数据，请稍后刷新。</li>';
       }
     };
 

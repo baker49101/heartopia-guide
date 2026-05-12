@@ -471,6 +471,10 @@ h3 {
   padding: 34px 0 54px;
 }
 
+.content-shell.wide {
+  max-width: 1120px;
+}
+
 .guide-article {
   padding: 28px;
   background: rgba(255, 253, 247, 0.94);
@@ -628,6 +632,231 @@ h3 {
   flex-wrap: wrap;
 }
 
+.map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 18px;
+  align-items: start;
+}
+
+.map-panel {
+  position: relative;
+  min-height: 600px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(191, 231, 242, 0.52), rgba(255, 248, 232, 0.4)),
+    radial-gradient(circle at 38% 42%, rgba(201, 234, 214, 0.95) 0 22%, transparent 23%),
+    radial-gradient(circle at 62% 35%, rgba(255, 211, 111, 0.35) 0 18%, transparent 19%),
+    var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.map-panel::before {
+  position: absolute;
+  inset: 40px;
+  content: "";
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.28) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+  background-size: 42px 42px;
+  border: 2px dashed rgba(87, 116, 98, 0.18);
+  border-radius: 22px;
+}
+
+.map-water,
+.map-river {
+  position: absolute;
+  pointer-events: none;
+}
+
+.map-water {
+  background: rgba(123, 202, 221, 0.42);
+  border: 1px solid rgba(74, 163, 188, 0.22);
+}
+
+.map-water.sea-one {
+  right: -80px;
+  bottom: -80px;
+  width: 48%;
+  height: 48%;
+  border-radius: 56% 0 0 0;
+}
+
+.map-water.sea-two {
+  left: -120px;
+  bottom: -70px;
+  width: 44%;
+  height: 38%;
+  border-radius: 0 65% 0 0;
+}
+
+.map-river {
+  width: 46%;
+  height: 80px;
+  background: rgba(191, 231, 242, 0.68);
+  border: 1px solid rgba(74, 163, 188, 0.16);
+  border-radius: 999px;
+  transform: rotate(14deg);
+}
+
+.map-river.river-one {
+  left: 20%;
+  top: 52%;
+}
+
+.map-river.river-two {
+  right: 7%;
+  top: 41%;
+  width: 30%;
+  transform: rotate(-24deg);
+}
+
+.map-town-core {
+  position: absolute;
+  top: 44%;
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  width: 150px;
+  height: 112px;
+  place-items: center;
+  padding: 14px;
+  color: var(--ink);
+  text-align: center;
+  background: rgba(255, 253, 247, 0.88);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(84, 113, 96, 0.16);
+  transform: translate(-50%, -50%);
+}
+
+.map-town-core span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.map-pin {
+  position: absolute;
+  top: var(--y);
+  left: var(--x);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  max-width: 150px;
+  padding: 0 9px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+  background: rgba(255, 253, 247, 0.94);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 20px rgba(84, 113, 96, 0.14);
+  transform: translate(-50%, -50%);
+}
+
+.map-pin::before {
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  content: "";
+  border-radius: 999px;
+}
+
+.map-pin.sea::before,
+.zone-type.sea {
+  background: var(--sky);
+}
+
+.map-pin.lake::before,
+.zone-type.lake {
+  background: var(--mint);
+}
+
+.map-pin.river::before,
+.zone-type.river {
+  background: #a9dff2;
+}
+
+.map-pin.town::before,
+.zone-type.town {
+  background: var(--sun);
+}
+
+.map-pin:hover {
+  z-index: 5;
+  transform: translate(-50%, -54%);
+}
+
+.map-sidebar {
+  display: grid;
+  gap: 16px;
+}
+
+.search-box.compact {
+  box-shadow: 0 10px 30px rgba(84, 113, 96, 0.09);
+}
+
+.map-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.map-filters .tag {
+  cursor: pointer;
+}
+
+.map-filters .tag[aria-pressed="true"] {
+  background: var(--sun);
+}
+
+.zone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.zone-card {
+  display: grid;
+  gap: 14px;
+  min-height: 260px;
+  padding: 20px;
+  background: rgba(255, 253, 247, 0.94);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(84, 113, 96, 0.09);
+  scroll-margin-top: 92px;
+}
+
+.zone-type {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  padding: 0 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+  border: 1px solid rgba(87, 116, 98, 0.14);
+  border-radius: var(--radius);
+}
+
+.route-card {
+  min-height: 280px;
+}
+
+.route-steps {
+  display: grid;
+  gap: 10px;
+  padding-left: 22px;
+  margin: 14px 0 0;
+  color: var(--muted);
+}
+
 @media (max-width: 940px) {
   .header-inner {
     grid-template-columns: 1fr;
@@ -646,8 +875,10 @@ h3 {
   }
 
   .town-board,
+  .map-layout,
   .grid.two,
-  .grid.three {
+  .grid.three,
+  .zone-grid {
     grid-template-columns: 1fr;
   }
 
@@ -666,6 +897,10 @@ h3 {
 
   .data-cell {
     border-top: 1px solid rgba(87, 116, 98, 0.11);
+  }
+
+  .map-panel {
+    min-height: 520px;
   }
 }
 
@@ -694,5 +929,14 @@ h3 {
 
   .footer-inner {
     flex-direction: column;
+  }
+
+  .map-panel {
+    min-height: 660px;
+  }
+
+  .map-pin {
+    max-width: 118px;
+    white-space: normal;
   }
 }

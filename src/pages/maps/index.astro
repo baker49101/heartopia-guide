@@ -1,24 +1,161 @@
 ---
-import { Map } from '@lucide/astro';
+import { Compass, Fish, Map, Route, Search } from '@lucide/astro';
+import { mapSourceLinks, mapZones, routePlans } from '../../data/maps';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="地图 | 心动小镇攻略手账" description="Heartopia / 心动小镇地图资源与路线。">
-  <section class="content-shell" data-pagefind-body>
+  <section class="content-shell wide" data-pagefind-body>
     <span class="eyebrow"><Map size={16} aria-hidden="true" /> Maps</span>
-    <h1>地图与路线</h1>
-    <p class="lead">地图页先承载资源点、采集路线、钓鱼水域和活动入口。后续可以升级为可筛选地图。</p>
-    <div class="grid two">
-      <div class="card">
-        <span class="tag">采集路线</span>
-        <h3>日常资源跑图</h3>
-        <p>用于记录高频材料刷新点和路线耗时。</p>
+    <h1>小镇地图与跑图路线</h1>
+    <p class="lead">
+      把常用水域、资源线和功能区整理成一张攻略地图。想钓鱼、采集、跑活动，先从这里选路线。
+    </p>
+  </section>
+
+  <section class="section">
+    <div class="map-layout">
+      <div class="map-panel" aria-label="心动小镇攻略手账地图">
+        <div class="map-water sea-one"></div>
+        <div class="map-water sea-two"></div>
+        <div class="map-river river-one"></div>
+        <div class="map-river river-two"></div>
+        <div class="map-town-core">
+          <Compass size={28} aria-hidden="true" />
+          <strong>小镇中心</strong>
+          <span>花园街 / 商店 / 导师</span>
+        </div>
+        {
+          mapZones.map((zone) => (
+            <a
+              class={`map-pin ${zone.tone}`}
+              href={`#${zone.id}`}
+              style={`--x:${zone.x}%; --y:${zone.y}%`}
+              aria-label={`${zone.name}：${zone.type}`}
+              data-map-pin
+              data-type={zone.type}
+              data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}
+            >
+              <span>{zone.name}</span>
+            </a>
+          ))
+        }
       </div>
-      <div class="card">
-        <span class="tag">兴趣玩法</span>
-        <h3>钓鱼与观鸟点位</h3>
-        <p>用于记录水域、时间、天气和出现条件。</p>
+
+      <aside class="map-sidebar">
+        <div class="search-box compact">
+          <label class="tag" for="map-search"><Search size={14} aria-hidden="true" /> 地图筛选</label>
+          <input id="map-search" class="filter-input" type="search" data-map-search placeholder="搜索海域、湖泊、河流、钓鱼、采集" />
+          <div class="map-filters" data-map-filters>
+            {['全部', '海域', '湖泊', '河流', '功能区'].map((type) => <button type="button" class="tag" data-map-filter={type}>{type}</button>)}
+          </div>
+        </div>
+        <div class="soft-band">
+          <h2>读图方式</h2>
+          <ul class="checklist">
+            <li>绿色是功能区，蓝色是海域，青色是湖泊，浅蓝线是河流。</li>
+            <li>点击地图点位可以跳到对应区域卡片。</li>
+            <li>点位位置为路线示意，实际位置以游戏内地图为准。</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow"><Fish size={16} aria-hidden="true" /> Zones</span>
+        <h2>区域资料卡</h2>
+        <p>按海域、湖泊、河流和功能区整理，适合查钓鱼、采集和活动路线。</p>
+      </div>
+    </div>
+    <div class="zone-grid" data-map-zone-list>
+      {
+        mapZones.map((zone) => (
+          <article id={zone.id} class="zone-card" data-map-zone data-type={zone.type} data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}>
+            <div>
+              <span class={`zone-type ${zone.tone}`}>{zone.type}</span>
+              <h3>{zone.name}</h3>
+              <p>{zone.summary}</p>
+            </div>
+            <div class="caption-row">
+              {zone.focus.map((item) => <span class="tag">{item}</span>)}
+            </div>
+            <p><strong>跑图提示：</strong>{zone.routeTip}</p>
+            <div class="card-meta">
+              <span>{zone.status}</span>
+              <a href={zone.sourceUrl} target="_blank" rel="noreferrer">参考</a>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow"><Route size={16} aria-hidden="true" /> Routes</span>
+        <h2>推荐跑图路线</h2>
+        <p>先按目标拆路线，而不是无脑绕全图。这样更适合轻量攻略站，也方便以后做成可勾选工具。</p>
+      </div>
+    </div>
+    <div class="grid two">
+      {
+        routePlans.map((plan) => (
+          <article class="card route-card">
+            <span class="tag">{plan.minutes}</span>
+            <h3>{plan.title}</h3>
+            <div class="caption-row">{plan.tags.map((tag) => <span class="tag">{tag}</span>)}</div>
+            <ol class="route-steps">
+              {plan.steps.map((step) => <li>{step}</li>)}
+            </ol>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="soft-band">
+      <h2>参考资料</h2>
+      <p>路线图用于快速导航，具体位置和活动时间以游戏内显示为准。</p>
+      <div class="footer-links">
+        {mapSourceLinks.map((link) => <a href={link.href} target="_blank" rel="noreferrer">{link.label}</a>)}
       </div>
     </div>
   </section>
 </BaseLayout>
+
+<script is:inline>
+  (() => {
+    const input = document.querySelector('[data-map-search]');
+    const zones = Array.from(document.querySelectorAll('[data-map-zone]'));
+    const pins = Array.from(document.querySelectorAll('[data-map-pin]'));
+    const filters = Array.from(document.querySelectorAll('[data-map-filter]'));
+    let currentType = '全部';
+
+    const update = () => {
+      const keyword = input?.value.trim().toLowerCase() ?? '';
+      const apply = (node) => {
+        const type = node.getAttribute('data-type');
+        const text = node.getAttribute('data-search')?.toLowerCase() ?? '';
+        const visible = (currentType === '全部' || type === currentType) && (!keyword || text.includes(keyword));
+        node.toggleAttribute('hidden', !visible);
+      };
+      zones.forEach(apply);
+      pins.forEach(apply);
+      filters.forEach((button) => button.toggleAttribute('aria-pressed', button.getAttribute('data-map-filter') === currentType));
+    };
+
+    input?.addEventListener('input', update);
+    filters.forEach((button) => {
+      button.addEventListener('click', () => {
+        currentType = button.getAttribute('data-map-filter') ?? '全部';
+        update();
+      });
+    });
+    update();
+  })();
+</script>

@@ -12,7 +12,7 @@ const { frontmatter } = Astro.props;
       <p class="lead">{frontmatter.description}</p>
       <div class="guide-meta">
         <span class="tag">更新：{frontmatter.updatedAt}</span>
-        <span class="tag">来源：{frontmatter.source}</span>
+        <span class="tag">参考：{frontmatter.source}</span>
       </div>
       <slot />
     </article>

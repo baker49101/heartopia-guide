@@ -7,10 +7,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section class="content-shell" data-pagefind-body>
     <span class="eyebrow"><Search size={16} aria-hidden="true" /> Search</span>
     <h1>搜索小镇手账</h1>
-    <p class="lead">构建发布后会生成全文搜索索引，适合快速查攻略、图鉴和活动。</p>
+    <p class="lead">输入鱼类、食谱、NPC、地图区域或活动关键词，快速查找相关内容。</p>
     <div class="search-box">
       <div id="search"></div>
-      <p id="search-fallback">搜索索引会在执行 `npm run build` 后生成。</p>
+      <p id="search-fallback">搜索准备中，请稍后再试。</p>
     </div>
   </section>
 </BaseLayout>
@@ -47,6 +47,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     }
   } catch {
-    if (fallback) fallback.textContent = '开发环境下暂未加载搜索索引，构建发布后可用。';
+    if (fallback) fallback.textContent = '搜索准备中，请稍后再试。';
   }
 </script>
