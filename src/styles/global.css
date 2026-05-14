@@ -768,12 +768,16 @@ h3 {
 .map-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
+  grid-template-areas: "map sidebar";
   gap: 18px;
   align-items: stretch;
 }
 
 .map-panel {
+  grid-area: map;
   position: relative;
+  width: 100%;
+  min-width: 0;
   aspect-ratio: 1 / 1;
   min-height: 640px;
   overflow: hidden;
@@ -1105,7 +1109,9 @@ h3 {
 }
 
 .map-sidebar {
+  grid-area: sidebar;
   display: grid;
+  min-width: 0;
   height: 100%;
   gap: 16px;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -1734,7 +1740,6 @@ h3 {
   }
 
   .town-board,
-  .map-layout,
   .grid.two,
   .grid.three,
   .seo-link-grid,
@@ -1771,8 +1776,20 @@ h3 {
     border-top: 1px solid rgba(87, 116, 98, 0.11);
   }
 
+}
+
+@media (max-width: 860px) {
+  .map-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sidebar"
+      "map";
+  }
+
   .map-panel {
-    min-height: 520px;
+    max-width: 860px;
+    min-height: clamp(480px, 82vw, 760px);
+    margin: 0 auto;
   }
 
   .map-sidebar {
