@@ -28,6 +28,11 @@ jobs:
       - name: Install
         run: npm ci
       - name: Build
+        env:
+          PUBLIC_ANALYTICS_API_BASE: ${{ vars.PUBLIC_ANALYTICS_API_BASE }}
+          PUBLIC_CF_WEB_ANALYTICS_TOKEN: ${{ vars.PUBLIC_CF_WEB_ANALYTICS_TOKEN }}
+          PUBLIC_UMAMI_SCRIPT_URL: ${{ vars.PUBLIC_UMAMI_SCRIPT_URL }}
+          PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.PUBLIC_UMAMI_WEBSITE_ID }}
         run: npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

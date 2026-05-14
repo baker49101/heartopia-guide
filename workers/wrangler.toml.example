@@ -2,6 +2,11 @@ name = "heartopia-analytics"
 main = "analytics-worker.js"
 compatibility_date = "2026-05-12"
 
+# 推荐直接走主站同域路径
+# routes = [
+#   { pattern = "xdxz.qichuan.xyz/api/*", zone_name = "qichuan.xyz" }
+# ]
+
 [[d1_databases]]
 binding = "DB"
 database_name = "heartopia_analytics"

@@ -31,13 +31,17 @@ npm run build
 主站支持以下环境变量：
 
 ```text
-PUBLIC_ANALYTICS_API_BASE=https://api.qichuan.xyz
+PUBLIC_ANALYTICS_API_BASE=https://xdxz.qichuan.xyz/api
 PUBLIC_CF_WEB_ANALYTICS_TOKEN=your-cloudflare-token
 PUBLIC_UMAMI_SCRIPT_URL=https://cloud.umami.is/script.js
 PUBLIC_UMAMI_WEBSITE_ID=your-umami-website-id
 ```
 
-只需要今日浏览和基础后台时，配置 `PUBLIC_ANALYTICS_API_BASE` 即可接入 `workers/` 里的 Cloudflare Worker 模板。
+只需要今日浏览和基础后台时，接入 `workers/` 里的 Cloudflare Worker 模板即可。
+
+- 推荐同域接法：把 Worker 路由到 `https://xdxz.qichuan.xyz/api/*`
+- 这样主站前端会直接请求当前域名下的 `/api`，不需要额外新域名
+- 如果你想改成单独统计域名，再设置 `PUBLIC_ANALYTICS_API_BASE`
 
 ## GitHub Pages
 

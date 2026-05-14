@@ -23,10 +23,18 @@ cd workers
 npx wrangler deploy
 ```
 
-部署后把 Worker 绑定到 `api.qichuan.xyz`，然后在 GitHub Pages 构建环境中设置：
+部署时推荐直接挂到主站同域路径：
 
 ```text
-PUBLIC_ANALYTICS_API_BASE=https://api.qichuan.xyz
+https://xdxz.qichuan.xyz/api/*
+```
+
+这样主站会直接请求当前域名下的 `/api/pageview`、`/api/online/heartbeat`、`/api/online` 和 `/api/stats/today`，不需要新域名。
+
+如果你想改成单独统计域名，也可以在 GitHub Pages 构建环境中设置：
+
+```text
+PUBLIC_ANALYTICS_API_BASE=https://your-domain.example/api
 ```
 
 如果暂时不部署 Worker，主站仍然可以正常静态发布，只是后台指标和在线小绿灯会显示待接入状态。

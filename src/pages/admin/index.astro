@@ -45,7 +45,12 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
     const root = document.querySelector('[data-admin-dashboard]');
     if (!root) return;
     const apiBase = root.getAttribute('data-api-base');
-    const api = apiBase ? apiBase.replace(/\/$/, '') : '';
+    const isLocalHost = ['127.0.0.1', 'localhost'].includes(location.hostname);
+    const api = apiBase
+      ? apiBase.replace(/\/$/, '')
+      : isLocalHost
+        ? ''
+        : `${location.origin}/api`;
     const setText = (name, value) => {
       const node = root.querySelector(`[data-metric="${name}"]`);
       if (node) node.textContent = String(value);

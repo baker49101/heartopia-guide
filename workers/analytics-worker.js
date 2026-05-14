@@ -32,6 +32,25 @@ const normalizeVisitor = (visitorId) => {
   return visitorId.replace(/[^a-zA-Z0-9_.:-]/g, '').slice(0, 80) || crypto.randomUUID();
 };
 
+const ONLINE_WINDOW_MINUTES = 2;
+
+const getOnlineCount = async (db) => {
+  await db.prepare(
+    `DELETE FROM online_sessions WHERE last_seen_at < datetime('now', ?)`
+  )
+    .bind(`-${ONLINE_WINDOW_MINUTES} minutes`)
+    .run();
+
+  const result = await db.prepare(
+    `SELECT COUNT(*) AS online FROM online_sessions
+     WHERE last_seen_at >= datetime('now', ?)`
+  )
+    .bind(`-${ONLINE_WINDOW_MINUTES} minutes`)
+    .first();
+
+  return Number(result?.online ?? 0);
+};
+
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
@@ -43,8 +62,9 @@ export default {
     }
 
     const url = new URL(request.url);
+    const pathname = url.pathname.replace(/^\/api(?=\/|$)/, '') || '/';
 
-    if (url.pathname === '/pageview' && request.method === 'POST') {
+    if (pathname === '/pageview' && request.method === 'POST') {
       const body = await readJson(request);
       const visitorId = normalizeVisitor(body.visitorId);
       const path = normalizePath(body.path);
@@ -62,7 +82,7 @@ export default {
       return json({ ok: true });
     }
 
-    if (url.pathname === '/online/heartbeat' && request.method === 'POST') {
+    if (pathname === '/online/heartbeat' && request.method === 'POST') {
       const body = await readJson(request);
       const visitorId = normalizeVisitor(body.visitorId);
       const path = normalizePath(body.path);
@@ -76,22 +96,25 @@ export default {
         .bind(visitorId, path)
         .run();
 
-      return json({ ok: true });
+      const online = await getOnlineCount(env.DB);
+      return json({
+        ok: true,
+        online,
+        windowMinutes: ONLINE_WINDOW_MINUTES,
+        updatedAt: new Date().toISOString()
+      });
     }
 
-    if (url.pathname === '/online' && request.method === 'GET') {
-      await env.DB.prepare(
-        `DELETE FROM online_sessions WHERE last_seen_at < datetime('now', '-2 minutes')`
-      ).run();
-      const result = await env.DB.prepare(
-        `SELECT COUNT(*) AS online FROM online_sessions
-         WHERE last_seen_at >= datetime('now', '-2 minutes')`
-      ).first();
-
-      return json({ online: result?.online ?? 0 });
+    if (pathname === '/online' && request.method === 'GET') {
+      const online = await getOnlineCount(env.DB);
+      return json({
+        online,
+        windowMinutes: ONLINE_WINDOW_MINUTES,
+        updatedAt: new Date().toISOString()
+      });
     }
 
-    if (url.pathname === '/stats/today' && request.method === 'GET') {
+    if (pathname === '/stats/today' && request.method === 'GET') {
       const pageviews = await env.DB.prepare(
         `SELECT COUNT(*) AS count FROM pageviews
          WHERE date(created_at, '+8 hours') = date('now', '+8 hours')`

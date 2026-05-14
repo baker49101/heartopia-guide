@@ -11,7 +11,12 @@ const cfBeacon = cfToken ? JSON.stringify({ token: cfToken }) : '';
 
 <script is:inline define:vars={{ apiBase }}>
   (() => {
-    const api = apiBase ? apiBase.replace(/\/$/, '') : '';
+    const isLocalHost = ['127.0.0.1', 'localhost'].includes(location.hostname);
+    const api = apiBase
+      ? apiBase.replace(/\/$/, '')
+      : isLocalHost
+        ? ''
+        : `${location.origin}/api`;
     if (!api) return;
 
     const visitorKey = 'heartopia.visitorId';

@@ -14,7 +14,14 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
 
     const label = root.querySelector('[data-online-label]');
     const apiBase = root.getAttribute('data-api-base');
-    const api = apiBase ? apiBase.replace(/\/$/, '') : '';
+    const isLocalHost = ['127.0.0.1', 'localhost'].includes(location.hostname);
+    const api = apiBase
+      ? apiBase.replace(/\/$/, '')
+      : isLocalHost
+        ? ''
+        : `${location.origin}/api`;
+    const heartbeatIntervalMs = 20000;
+    let refreshTimer = null;
 
     const setWaiting = (text) => {
       root.classList.remove('is-live');
@@ -22,10 +29,12 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
       label.textContent = text;
     };
 
-    const setLive = (count) => {
+    const setLocalizedLive = (count) => {
+      const lang = window.heartopiaI18n?.getLanguage?.() || 'zh';
+      const suffix = window.heartopiaI18n?.ui?.[lang]?.['online.liveSuffix'] || '位镇民在线';
       root.classList.remove('is-waiting');
       root.classList.add('is-live');
-      label.textContent = `${count} 位镇民在线`;
+      label.textContent = `${count} ${suffix}`;
     };
 
     if (!api) {
@@ -45,11 +54,16 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
 
     const heartbeat = async () => {
       try {
-        await fetch(`${api}/online/heartbeat`, {
+        const response = await fetch(`${api}/online/heartbeat`, {
           method: 'POST',
+          cache: 'no-store',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({ visitorId, path: location.pathname })
         });
+        if (!response.ok) throw new Error('heartbeat request failed');
+        const data = await response.json();
+        const count = Number(data.online);
+        if (Number.isFinite(count)) setLocalizedLive(count);
       } catch {
         setWaiting(window.heartopiaI18n?.ui?.[window.heartopiaI18n.getLanguage()]?.['online.connecting'] || '小镇灯塔连接中');
       }
@@ -61,21 +75,33 @@ const apiBase = import.meta.env.PUBLIC_ANALYTICS_API_BASE ?? '';
         if (!response.ok) throw new Error('online request failed');
         const data = await response.json();
         const count = Number(data.online);
-        if (Number.isFinite(count)) {
-          const lang = window.heartopiaI18n?.getLanguage?.() || 'zh';
-          const suffix = window.heartopiaI18n?.ui?.[lang]?.['online.liveSuffix'] || '位镇民在线';
-          root.classList.remove('is-waiting');
-          root.classList.add('is-live');
-          label.textContent = `${count} ${suffix}`;
-        }
+        if (Number.isFinite(count)) setLocalizedLive(count);
       } catch {
         setWaiting(window.heartopiaI18n?.ui?.[window.heartopiaI18n.getLanguage()]?.['online.connecting'] || '小镇灯塔连接中');
       }
     };
 
-    heartbeat();
+    const runActiveLoop = () => {
+      if (refreshTimer) clearInterval(refreshTimer);
+      heartbeat();
+      refreshTimer = setInterval(() => {
+        if (document.visibilityState !== 'visible') return;
+        heartbeat();
+      }, heartbeatIntervalMs);
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        refresh();
+        heartbeat();
+      }
+    });
+
+    document.addEventListener('heartopia:language-applied', () => {
+      if (root.classList.contains('is-live')) refresh();
+    });
+
+    runActiveLoop();
     refresh();
-    setInterval(heartbeat, 30000);
-    setInterval(refresh, 30000);
   })();
 </script>
