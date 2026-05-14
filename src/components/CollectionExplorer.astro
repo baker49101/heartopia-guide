@@ -57,7 +57,86 @@ const valueToText = (value: unknown): string => {
 
 const fieldText = (item: Record<string, any>, key: string) => valueToText(item[key]);
 const itemAnchor = (item: Record<string, any>) => encodeURIComponent(String(item.id || item.name).toLowerCase());
+const titleize = (value: string) =>
+  value
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+const englishLabels: Record<string, string> = {
+  name: 'Name',
+  location: 'Location',
+  fishType: 'Type',
+  shadowSize: 'Shadow Size',
+  activity: 'Activity',
+  fishingLevel: 'Fishing Lv.',
+  catchingLevel: 'Catching Lv.',
+  birdwatchLevel: 'Birdwatch Lv.',
+  weather: 'Weather',
+  timeOfDay: 'Time',
+  prices: 'Prices',
+  size: 'Size',
+  crops: 'Crops',
+  flowers: 'Flowers',
+  growthTime: 'Growth Time',
+  gardeningLevel: 'Gardening Lv.',
+  seedPrice: 'Seed Price',
+  sellPrice: 'Sell Price',
+  buyPrice: 'Buy Price',
+  energy: 'Energy',
+  ingredients: 'Ingredients',
+  cost: 'Cost',
+  profit: 'Profit',
+  unlock: 'Unlock',
+  gifts: 'Gifts',
+  shop: 'Shop',
+  species: 'Species',
+  favoriteFood: 'Favorite Food',
+  favoriteWeather: 'Favorite Weather',
+  ability: 'Ability',
+  category: 'Category',
+  difficulty: 'Difficulty',
+  bpm: 'BPM',
+  instrument: 'Instrument',
+  composer: 'Composer',
+  notes: 'Notes'
+};
+const englishLabel = (value: string) => englishLabels[value] ?? titleize(value);
+const collectionKey = collection.slug === 'forageables' ? 'forage' : collection.slug;
+const collectionTipsEn: Record<string, string> = {
+  fish: 'Filter by weather and time first, then use shadow size to cut bad casts. Keep event fish in the tracker.',
+  insects: 'Start with weather and time, then clear one location at a time to avoid chasing scattered spawns.',
+  birds: 'Use the map to lock the right lake or sea area first, then wait for the weather window you need.',
+  crops: 'Sort by growth time before planting so harvest windows and cooking prep stay in sync.',
+  flowers: 'Group flowers by level and growth time when planning beds or gift runs.',
+  forage: 'Bundle wood, ore, flowers, and herbs into one short route instead of clearing one material at a time.',
+  recipes: 'Check unlocks and profit together so you do not spend rare ingredients on weak dishes.',
+  characters: 'Keep gifts, shop access, and daily visit targets visible together to shorten town loops.',
+  wildlife: 'Follow the habitat first, then narrow by favorite food or weather.',
+  pets: 'Compare size, food, and ability together before you commit to a pet route.',
+  achievements: 'Treat achievements as long routes: group easy overlapping goals before chasing the rare ones.',
+  music: 'Sort by difficulty or instrument when building practice lists.',
+  default: 'Search by location, condition, or use-case first, then narrow with the side filters.'
+};
+const countLabelsEn: Record<string, string> = {
+  fish: 'fish entries',
+  insects: 'insect entries',
+  birds: 'bird entries',
+  crops: 'crop entries',
+  flowers: 'flower entries',
+  forage: 'forage entries',
+  recipes: 'recipe entries',
+  characters: 'character entries',
+  wildlife: 'wildlife entries',
+  pets: 'pet entries',
+  achievements: 'achievement entries',
+  music: 'music entries'
+};
 const pageUrl = new URL(Astro.url.pathname, SITE.url).href;
+const collectionTitleKey = `collection.${collectionKey}`;
+const collectionDescriptionKey = `collection.desc.${collectionKey}`;
+const collectionTipEn = collectionTipsEn[collectionKey] ?? collectionTipsEn.default;
+const collectionCountLabelEn = countLabelsEn[collectionKey] ?? 'entries';
 
 const facetValues = collection.facets.map((facet) => ({
   ...facet,
@@ -100,28 +179,26 @@ const itemListSchema = {
 
 <section class="collection-hero" data-pagefind-body>
   <div>
-    <span class="eyebrow"><Icon size={16} aria-hidden="true" /> {collection.category}</span>
-    <h1>{collection.title}</h1>
-    <p class="lead">{collection.description}</p>
-    <p class="collection-context">Heartopia / 心动小镇{collection.navTitle}资料，适合按名称、地点、等级、条件和用途快速查询。</p>
+    <span class="eyebrow"><Icon size={16} aria-hidden="true" /> <span data-localize-en={collection.category === '收集' ? 'Collecting' : collection.category === '生活' ? 'Life' : collection.category === '居民' ? 'Residents' : 'Tools'}>{collection.category}</span></span>
+    <h1 data-i18n={collectionTitleKey}>{collection.title}</h1>
+    <p class="lead" data-i18n={collectionDescriptionKey}>{collection.description}</p>
   </div>
   <div class="collection-source-card">
     <strong>{collection.items.length}</strong>
-    <span>{collection.countLabel}</span>
-    <a href={collection.sourceUrl} target="_blank" rel="noreferrer">来源站资料</a>
-    <small>抓取核对：{collection.sourceFetchedAt}</small>
+    <span data-localize-en={collectionCountLabelEn}>{collection.countLabel}</span>
   </div>
 </section>
 
 <section class="section" data-pagefind-body>
   <div class="collection-toolbar" data-collection-explorer>
     <div class="collection-search">
-      <label class="tag" for={`collection-search-${collection.slug}`}>搜索</label>
+      <label class="tag" for={`collection-search-${collection.slug}`} data-i18n="common.search">搜索</label>
       <input
         id={`collection-search-${collection.slug}`}
         class="filter-input"
         type="search"
         data-collection-query
+        data-i18n-placeholder="database.search.placeholder"
         placeholder={`搜索${collection.navTitle}、地点、条件或用途`}
       />
     </div>
@@ -129,31 +206,31 @@ const itemListSchema = {
       {
         facetValues.map((facet) => (
           <label>
-            <span>{facet.label}</span>
+            <span data-localize-en={englishLabel(facet.key)}>{facet.label}</span>
             <select data-collection-facet={facet.key}>
-              <option value="">全部{facet.label}</option>
+              <option value="" data-localize-en={`All ${englishLabel(facet.key)}`}>全部{facet.label}</option>
               {facet.values.map((value) => <option value={value}>{value}</option>)}
             </select>
           </label>
         ))
       }
       <label>
-        <span>排序</span>
+        <span data-localize-en="Sort">排序</span>
         <select data-collection-sort>
-          {collection.sortKeys.map((sort) => <option value={sort.key}>{sort.label}</option>)}
+          {collection.sortKeys.map((sort) => <option value={sort.key} data-localize-en={englishLabel(sort.key)}>{sort.label}</option>)}
         </select>
       </label>
     </div>
   </div>
 
   <div class="collection-note">
-    <strong>使用建议</strong>
-    <p>{collection.tip}</p>
+    <strong data-localize-en="Tips">使用建议</strong>
+    <p data-localize-en={collectionTipEn}>{collection.tip}</p>
   </div>
 
   <div class="collection-count-line">
     <span data-collection-count>{collection.items.length}</span>
-    <span>条结果</span>
+    <span data-localize-en="results">条结果</span>
   </div>
 
   <div class="item-card-grid" data-collection-list>
@@ -162,6 +239,7 @@ const itemListSchema = {
         const searchText = valueToText(item);
         const facetPayload = Object.fromEntries(collection.facets.map((facet) => [facet.key, fieldText(item, facet.key)]));
         const sortPayload = Object.fromEntries(collection.sortKeys.map((sort) => [sort.key, fieldText(item, sort.key)]));
+        const englishName = titleize(String(item.id || item.name));
         return (
           <article
             class="item-card"
@@ -174,11 +252,11 @@ const itemListSchema = {
             <div class="item-card-head">
               <span class="collection-icon small"><Icon size={20} aria-hidden="true" /></span>
               <div>
-                <h2>{item.name}</h2>
+                <h2 data-localize-en={englishName}>{item.name}</h2>
                 <div class="caption-row">
                   {collection.fields.slice(0, 3).map((field) => {
                     const text = renderFieldValue(item, field);
-                    return text ? <span class="tag">{field.label}: {text}</span> : null;
+                    return text ? <span class="tag"><span data-localize-en={englishLabel(field.key)}>{field.label}</span>: {text}</span> : null;
                   })}
                 </div>
               </div>
@@ -194,7 +272,7 @@ const itemListSchema = {
                     if (rows.length === 0) return null;
                     return (
                       <div class="item-field wide">
-                        <span>{field.label}</span>
+                        <span data-localize-en={englishLabel(field.key)}>{field.label}</span>
                         <div class="star-price-row">
                           {rows.map(([key, amount]) => (
                             <span>
@@ -209,7 +287,7 @@ const itemListSchema = {
                   const text = renderFieldValue(item, field);
                   return (
                     <div class={`item-field ${field.kind === 'long' ? 'wide' : ''}`}>
-                      <span>{field.label}</span>
+                      <span data-localize-en={englishLabel(field.key)}>{field.label}</span>
                       <strong>{text}</strong>
                     </div>
                   );
@@ -218,8 +296,7 @@ const itemListSchema = {
             </div>
 
             <div class="item-card-footer">
-              <span>{item._meta?.confidence === 'high' ? '高可信' : '待复核'}</span>
-              <a href={item.sourceUrl || collection.sourceUrl} target="_blank" rel="noreferrer">查看来源</a>
+              <span data-localize-en={item._meta?.confidence === 'high' ? 'Checked' : 'Reviewing'}>{item._meta?.confidence === 'high' ? '已核对' : '待复核'}</span>
             </div>
           </article>
         );
@@ -282,6 +359,13 @@ const itemListSchema = {
     input?.addEventListener('input', update);
     facets.forEach((select) => select.addEventListener('change', update));
     sort?.addEventListener('change', update);
+    document.addEventListener('heartopia:language-applied', (event) => {
+      const language = event.detail?.language;
+      document.querySelectorAll('[data-localize-en]').forEach((node) => {
+        if (!node.dataset.zhText) node.dataset.zhText = node.textContent || '';
+        node.textContent = language === 'zh' ? node.dataset.zhText : node.getAttribute('data-localize-en');
+      });
+    });
     update();
   })();
 </script>

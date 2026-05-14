@@ -1,7 +1,14 @@
 ---
-import { Compass, ExternalLink, Fish, Layers, LocateFixed, Map, Minus, Plus, Route, Search } from '@lucide/astro';
-import { mapLayerSummaries, mapPins, mapSourceLinks, mapZones, routePlans, sourceInteractiveMapUrl } from '../../data/maps';
+import { Download, Expand, Fish, Flag, Layers, LocateFixed, Map, Minus, Plus, RefreshCw, Route, Search } from '@lucide/astro';
+import { mapBackgroundImage, mapLayerSummaries, mapPins, mapSourceLinks, mapZones, routePlans } from '../../data/maps';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const defaultVisibleLayers = new Set(['locations', 'npcs', 'shops', 'bus', 'resources', 'animals']);
+const mapLayerGroups = mapLayerSummaries.map((layer, index) => ({
+  ...layer,
+  expanded: index === 0,
+  pins: mapPins.filter((pin) => pin.layer === layer.id)
+}));
 ---
 
 <BaseLayout title="地图 | 心动小镇攻略手账" description="Heartopia / 心动小镇地图资源与路线。">
@@ -9,29 +16,26 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <span class="eyebrow"><Map size={16} aria-hidden="true" /> Maps</span>
     <h1 data-i18n="maps.title">小镇地图与跑图路线</h1>
     <p class="lead" data-i18n="maps.lead">
-      把常用水域、资源线和功能区整理成一张攻略地图。想钓鱼、采集、跑活动，先从这里选路线。
+      把地点、角色、商店、巴士、资源和图鉴点位整理成一张互动地图。想定位目标，先从这里筛选。
     </p>
   </section>
 
   <section class="section">
     <div class="map-layout" data-interactive-map>
-      <div class="map-panel" aria-label="心动小镇攻略手账地图">
-        <div class="map-toolbar">
-          <button type="button" data-map-zoom="in" aria-label="Zoom in"><Plus size={16} aria-hidden="true" /></button>
+      <div class="map-panel" aria-label="心动小镇互动地图" data-i18n-aria="maps.aria">
+        <div class="map-toolbar" aria-label="地图工具">
+          <button type="button" data-map-refresh aria-label="Refresh map" title="Refresh map"><RefreshCw size={16} aria-hidden="true" /></button>
           <button type="button" data-map-zoom="out" aria-label="Zoom out"><Minus size={16} aria-hidden="true" /></button>
+          <span data-map-zoom-label>1.0x</span>
+          <button type="button" data-map-zoom="in" aria-label="Zoom in"><Plus size={16} aria-hidden="true" /></button>
+          <button type="button" data-map-mark-mode aria-label="Toggle mark mode" title="Toggle mark mode"><Flag size={16} aria-hidden="true" /></button>
           <button type="button" data-map-reset aria-label="Reset map"><LocateFixed size={16} aria-hidden="true" /></button>
+          <button type="button" data-map-fullscreen aria-label="Fullscreen map" title="Fullscreen map"><Expand size={16} aria-hidden="true" /></button>
+          <button type="button" data-map-export aria-label="Export map"><Download size={16} aria-hidden="true" /></button>
         </div>
         <div class="map-viewport" data-map-viewport>
           <div class="map-stage" data-map-stage>
-            <div class="map-water sea-one"></div>
-            <div class="map-water sea-two"></div>
-            <div class="map-river river-one"></div>
-            <div class="map-river river-two"></div>
-            <div class="map-town-core">
-              <Compass size={28} aria-hidden="true" />
-              <strong>小镇中心</strong>
-              <span>花园街 / 商店 / 导师</span>
-            </div>
+            <img src={mapBackgroundImage} alt="" aria-hidden="true" draggable="false" />
             {
               mapPins.map((pin) => (
                 <button
@@ -42,18 +46,23 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
                   data-map-pin
                   data-zone-id={pin.id}
                   data-zone-name={pin.name}
+                  data-zone-en={pin.englishName}
                   data-zone-summary={pin.summary}
+                  data-zone-summary-en={pin.summaryEn}
                   data-zone-tip={pin.detail}
+                  data-zone-tip-en={pin.detailEn}
                   data-layer={pin.layer}
-                  data-search={`${pin.name} ${pin.layer} ${pin.tags.join(' ')} ${pin.summary}`}
+                  data-search={`${pin.name} ${pin.englishName} ${pin.layer} ${pin.tags.join(' ')} ${pin.summary} ${pin.summaryEn} ${pin.detail} ${pin.detailEn}`}
                 >
-                  <span>{pin.name}</span>
+                  <span data-map-pin-label>{pin.name}</span>
                 </button>
               ))
             }
+            <div class="map-custom-markers" data-map-custom-layer></div>
           </div>
         </div>
         <div class="map-detail" data-map-detail hidden>
+          <button type="button" class="map-detail-close" data-map-detail-close aria-label="Close popup">×</button>
           <strong data-map-detail-title></strong>
           <p data-map-detail-summary></p>
           <small data-map-detail-tip></small>
@@ -64,50 +73,64 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
       <aside class="map-sidebar">
         <div class="search-box compact">
           <label class="tag" for="map-search"><Search size={14} aria-hidden="true" /> <span data-i18n="maps.filter.label">地图筛选</span></label>
-          <input id="map-search" class="filter-input" type="search" data-map-search data-i18n-placeholder="maps.filter.placeholder" placeholder="搜索海域、湖泊、河流、钓鱼、采集" />
-          <div class="map-filters" data-map-filters>
-            <button type="button" class="tag" data-map-filter="全部" data-i18n="maps.filter.all">全部</button>
-            {mapLayerSummaries.map((layer) => <button type="button" class="tag" data-map-filter={layer.id}>{layer.label}</button>)}
-          </div>
+          <input id="map-search" class="filter-input" type="search" data-map-search data-i18n-placeholder="maps.filter.placeholder" placeholder="搜索地点、角色、鱼类、昆虫、鸟类" />
+          <div class="map-search-results" data-map-search-results hidden></div>
         </div>
         <div class="soft-band map-layer-card">
-          <h2><Layers size={16} aria-hidden="true" /> 图层概览</h2>
+          <h2><Layers size={16} aria-hidden="true" /> <span data-i18n="maps.layers.title">图层概览</span></h2>
           <div class="layer-list">
             {
-              mapLayerSummaries.map((layer) => (
-                <button type="button" data-map-layer-jump={layer.id}>
-                  <strong>{layer.label}</strong>
-                  <span>{layer.count}</span>
-                  <small>{layer.description}</small>
-                </button>
+              mapLayerGroups.map((layer) => (
+                <div class="map-layer-group" data-map-layer-group={layer.id} data-expanded={layer.expanded ? 'true' : 'false'}>
+                  <div class="map-layer-row">
+                    <button type="button" data-map-layer-toggle={layer.id}>
+                      <strong data-i18n={layer.labelKey}>{layer.label}</strong>
+                      <span>{layer.count}</span>
+                      <small data-map-copy data-zh={layer.description} data-en={layer.descriptionEn}>{layer.description}</small>
+                    </button>
+                    <button
+                      type="button"
+                      class="map-layer-visibility"
+                      data-map-layer-visibility={layer.id}
+                      aria-pressed={defaultVisibleLayers.has(layer.id) ? 'true' : 'false'}
+                      data-default-visible={defaultVisibleLayers.has(layer.id) ? 'true' : 'false'}
+                    >
+                      <span data-i18n="maps.layer.visible">显示</span>
+                    </button>
+                  </div>
+                  <div class="map-layer-items">
+                    {
+                      layer.pins.map((pin) => (
+                        <button type="button" data-map-list-pin={pin.id} data-pin-name={pin.name} data-pin-en={pin.englishName}>
+                          <span>{pin.name}</span>
+                        </button>
+                      ))
+                    }
+                  </div>
+                </div>
               ))
             }
           </div>
         </div>
+        <div class="soft-band map-mark-card">
+          <div class="map-mark-head">
+            <h2><Flag size={16} aria-hidden="true" /> <span data-map-copy data-zh="我的标记" data-en="My Markers">我的标记</span></h2>
+            <button type="button" class="map-mark-clear" data-map-clear-marks>
+              <span data-map-copy data-zh="清空" data-en="Clear">清空</span>
+            </button>
+          </div>
+          <div class="map-mark-list" data-map-mark-list></div>
+        </div>
         <div class="soft-band">
-          <h2 data-i18n="maps.read.title">读图方式</h2>
+          <h2 data-i18n="maps.read.title">地图操作</h2>
           <ul class="checklist">
-            <li data-i18n="maps.read.item.1">绿色是功能区，蓝色是海域，青色是湖泊，浅蓝线是河流。</li>
-            <li data-i18n="maps.read.item.2">拖动地图查看区域，使用 + / - 或滚轮缩放。</li>
-            <li data-i18n="maps.read.item.3">点击地图点位可以查看说明，并跳到对应区域卡片。</li>
-            <li data-i18n="maps.read.item.4">点位位置为路线示意，实际位置以游戏内地图为准。</li>
+            <li data-i18n="maps.read.item.1">点击分类展开条目，再点条目定位到地图点位。</li>
+            <li data-i18n="maps.read.item.2">每个分类都有显隐开关，可只看当前目标图层。</li>
+            <li data-i18n="maps.read.item.3">搜索会给出匹配结果，点击结果直接打开弹窗。</li>
+            <li data-i18n="maps.read.item.4">可拖拽、缩放、重置视图，也可导出当前地图截图。</li>
           </ul>
         </div>
       </aside>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow"><ExternalLink size={16} aria-hidden="true" /> Source Map</span>
-        <h2>高清互动地图</h2>
-        <p>这里嵌入来源站公开的高清互动地图，用来核对精确点位；上方本站地图更适合快速筛选路线和加入追踪。</p>
-      </div>
-      <a class="btn secondary" href={sourceInteractiveMapUrl} target="_blank" rel="noreferrer">新窗口打开</a>
-    </div>
-    <div class="source-map-frame">
-      <iframe src={sourceInteractiveMapUrl} title="Heartopia.live 高清互动地图" loading="lazy"></iframe>
     </div>
   </section>
 
@@ -122,19 +145,18 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     <div class="zone-grid" data-map-zone-list>
       {
         mapZones.map((zone) => (
-          <article id={zone.id} class="zone-card" data-map-zone data-type={zone.type} data-layer="locations" data-search={`${zone.name} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}>
+          <article id={zone.id} class="zone-card" data-map-zone data-type={zone.type} data-layer="locations" data-search={`${zone.name} ${zone.englishName} ${zone.type} ${zone.focus.join(' ')} ${zone.summary}`}>
             <div>
-              <span class={`zone-type ${zone.tone}`}>{zone.type}</span>
-              <h3>{zone.name}</h3>
-              <p>{zone.summary}</p>
+              <span class={`zone-type ${zone.tone}`} data-map-copy data-zh={zone.type} data-en={zone.typeEn}>{zone.type}</span>
+              <h3 data-map-copy data-zh={zone.name} data-en={zone.englishName}>{zone.name}</h3>
+              <p data-map-copy data-zh={zone.summary} data-en={zone.summaryEn}>{zone.summary}</p>
             </div>
             <div class="caption-row">
-              {zone.focus.map((item) => <span class="tag">{item}</span>)}
+              {zone.focus.map((item, index) => <span class="tag" data-map-copy data-zh={item} data-en={zone.focusEn[index] ?? item}>{item}</span>)}
             </div>
-            <p><strong data-i18n="maps.route.tipLabel">跑图提示：</strong>{zone.routeTip}</p>
+            <p><strong data-i18n="maps.route.tipLabel">跑图提示：</strong><span data-map-copy data-zh={zone.routeTip} data-en={zone.routeTipEn}>{zone.routeTip}</span></p>
             <div class="card-meta">
-              <span>{zone.status}</span>
-              <a href={zone.sourceUrl} target="_blank" rel="noreferrer" data-i18n="guide.reference">参考</a>
+              <span data-map-copy data-zh={zone.status} data-en={zone.statusEn}>{zone.status}</span>
             </div>
           </article>
         ))
@@ -155,10 +177,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
         routePlans.map((plan) => (
           <article class="card route-card">
             <span class="tag">{plan.minutes}</span>
-            <h3>{plan.title}</h3>
-            <div class="caption-row">{plan.tags.map((tag) => <span class="tag">{tag}</span>)}</div>
+            <h3 data-map-copy data-zh={plan.title} data-en={plan.titleEn}>{plan.title}</h3>
+            <div class="caption-row">{plan.tags.map((tag, index) => <span class="tag" data-map-copy data-zh={tag} data-en={plan.tagsEn[index] ?? tag}>{tag}</span>)}</div>
             <ol class="route-steps">
-              {plan.steps.map((step) => <li>{step}</li>)}
+              {plan.steps.map((step, index) => <li data-map-copy data-zh={step} data-en={plan.stepsEn[index] ?? step}>{step}</li>)}
             </ol>
           </article>
         ))
@@ -167,7 +189,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   </section>
 
   <section class="section">
-    <div class="soft-band">
+    <div class="soft-band compact-reference">
       <h2 data-i18n="sources.title">参考资料</h2>
       <p data-i18n="maps.sources.lead">路线图用于快速导航，具体位置和活动时间以游戏内显示为准。</p>
       <div class="footer-links">
@@ -178,113 +200,360 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   <script is:inline>
     (() => {
-    const input = document.querySelector('[data-map-search]');
-    const zones = Array.from(document.querySelectorAll('[data-map-zone]'));
-    const pins = Array.from(document.querySelectorAll('[data-map-pin]'));
-    const filters = Array.from(document.querySelectorAll('[data-map-filter]'));
-    const viewport = document.querySelector('[data-map-viewport]');
-    const stage = document.querySelector('[data-map-stage]');
-    const detail = document.querySelector('[data-map-detail]');
-    const detailTitle = document.querySelector('[data-map-detail-title]');
-    const detailSummary = document.querySelector('[data-map-detail-summary]');
-    const detailTip = document.querySelector('[data-map-detail-tip]');
-    const trackLink = document.querySelector('[data-map-track]');
-    let scale = 1;
-    let x = 0;
-    let y = 0;
-    let dragging = false;
-    let startX = 0;
-    let startY = 0;
-    let currentType = '全部';
-    let selectedPin = null;
-    const renderTransform = () => {
-      if (stage) stage.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-    };
-    const zoom = (nextScale) => {
-      scale = Math.min(1.8, Math.max(0.8, nextScale));
-      renderTransform();
-    };
+      const input = document.querySelector('[data-map-search]');
+      const zones = Array.from(document.querySelectorAll('[data-map-zone]'));
+      const pins = Array.from(document.querySelectorAll('[data-map-pin]'));
+      const layerGroups = Array.from(document.querySelectorAll('[data-map-layer-group]'));
+      const layerToggles = Array.from(document.querySelectorAll('[data-map-layer-toggle]'));
+      const visibilityButtons = Array.from(document.querySelectorAll('[data-map-layer-visibility]'));
+      const listPinButtons = Array.from(document.querySelectorAll('[data-map-list-pin]'));
+      const searchResults = document.querySelector('[data-map-search-results]');
+      const viewport = document.querySelector('[data-map-viewport]');
+      const stage = document.querySelector('[data-map-stage]');
+      const detail = document.querySelector('[data-map-detail]');
+      const detailTitle = document.querySelector('[data-map-detail-title]');
+      const detailSummary = document.querySelector('[data-map-detail-summary]');
+      const detailTip = document.querySelector('[data-map-detail-tip]');
+      const trackLink = document.querySelector('[data-map-track]');
+      const zoomLabel = document.querySelector('[data-map-zoom-label]');
+      const closeButton = document.querySelector('[data-map-detail-close]');
+      const customLayer = document.querySelector('[data-map-custom-layer]');
+      const markList = document.querySelector('[data-map-mark-list]');
+      const clearMarksButton = document.querySelector('[data-map-clear-marks]');
+      const refreshButton = document.querySelector('[data-map-refresh]');
+      const fullscreenButton = document.querySelector('[data-map-fullscreen]');
+      const markModeButton = document.querySelector('[data-map-mark-mode]');
+      const storageKey = 'heartopia.map.custom-marks';
+      const visibleLayers = new Set(
+        visibilityButtons
+          .filter((button) => button.getAttribute('data-default-visible') !== 'false')
+          .map((button) => button.getAttribute('data-map-layer-visibility'))
+          .filter(Boolean)
+      );
+      let scale = 1;
+      let x = 0;
+      let y = 0;
+      let dragging = false;
+      let startX = 0;
+      let startY = 0;
+      let dragDistance = 0;
+      let selectedPin = null;
+      let currentLanguage = document.documentElement.dataset.language || 'zh';
+      let markMode = false;
+      let customMarks = [];
 
-    const update = () => {
-      const keyword = input?.value.trim().toLowerCase() ?? '';
-      const apply = (node) => {
-        const type = node.getAttribute('data-layer') || node.getAttribute('data-type');
-        const text = node.getAttribute('data-search')?.toLowerCase() ?? '';
-        const visible = (currentType === '全部' || type === currentType) && (!keyword || text.includes(keyword));
-        node.toggleAttribute('hidden', !visible);
+      const readText = (node, type) => node?.getAttribute(type === 'zh' ? 'data-zh' : 'data-en') || node?.textContent || '';
+      const getPinName = (pin) => currentLanguage === 'zh'
+        ? pin.getAttribute('data-zone-name') || ''
+        : pin.getAttribute('data-zone-en') || pin.getAttribute('data-zone-name') || '';
+      const getPinSummary = (pin) => currentLanguage === 'zh'
+        ? pin.getAttribute('data-zone-summary') || ''
+        : pin.getAttribute('data-zone-summary-en') || pin.getAttribute('data-zone-summary') || '';
+      const getPinDetail = (pin) => currentLanguage === 'zh'
+        ? pin.getAttribute('data-zone-tip') || ''
+        : pin.getAttribute('data-zone-tip-en') || pin.getAttribute('data-zone-tip') || '';
+      const getLayerLabel = (layer) => {
+        const group = layerGroups.find((item) => item.getAttribute('data-map-layer-group') === layer);
+        const title = group?.querySelector('strong');
+        return title?.textContent?.trim() || layer || '';
       };
-      zones.forEach(apply);
-      pins.forEach(apply);
-      filters.forEach((button) => button.toggleAttribute('aria-pressed', button.getAttribute('data-map-filter') === currentType));
-    };
+      const saveMarks = () => localStorage.setItem(storageKey, JSON.stringify(customMarks));
+      const loadMarks = () => {
+        try {
+          return JSON.parse(localStorage.getItem(storageKey) || '[]');
+        } catch {
+          return [];
+        }
+      };
+      const buildMarkLabel = (mark, index) => currentLanguage === 'zh' ? `标记 ${index + 1}` : `Mark ${index + 1}`;
+      const resetDetail = () => {
+        detail.hidden = true;
+        selectedPin?.classList.remove('is-selected');
+        selectedPin = null;
+      };
 
-    input?.addEventListener('input', update);
-    filters.forEach((button) => {
-      button.addEventListener('click', () => {
-        currentType = button.getAttribute('data-map-filter') ?? '全部';
-        update();
-      });
-    });
-    document.querySelectorAll('[data-map-layer-jump]').forEach((button) => {
-      button.addEventListener('click', () => {
-        currentType = button.getAttribute('data-map-layer-jump') || '全部';
-        update();
-      });
-    });
-    document.querySelector('[data-map-zoom="in"]')?.addEventListener('click', () => {
-      zoom(scale + 0.15);
-    });
-    document.querySelector('[data-map-zoom="out"]')?.addEventListener('click', () => {
-      zoom(scale - 0.15);
-    });
-    document.querySelector('[data-map-reset]')?.addEventListener('click', () => {
-      scale = 1;
-      x = 0;
-      y = 0;
-      renderTransform();
-    });
-    viewport?.addEventListener('wheel', (event) => {
-      event.preventDefault();
-      zoom(scale + (event.deltaY < 0 ? 0.08 : -0.08));
-    }, { passive: false });
-    viewport?.addEventListener('pointerdown', (event) => {
-      if (event.target.closest('[data-map-pin]')) return;
-      dragging = true;
-      startX = event.clientX - x;
-      startY = event.clientY - y;
-      viewport.setPointerCapture(event.pointerId);
-    });
-    viewport?.addEventListener('pointermove', (event) => {
-      if (!dragging) return;
-      x = event.clientX - startX;
-      y = event.clientY - startY;
-      renderTransform();
-    });
-    viewport?.addEventListener('pointerup', () => {
-      dragging = false;
-    });
-    viewport?.addEventListener('pointercancel', () => {
-      dragging = false;
-    });
-    pins.forEach((pin) => {
-      pin.addEventListener('click', () => {
+      const renderTransform = () => {
+        if (stage) stage.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        if (zoomLabel) zoomLabel.textContent = `${scale.toFixed(1)}x`;
+      };
+
+      const zoom = (nextScale) => {
+        scale = Math.min(3, Math.max(0.75, nextScale));
+        renderTransform();
+      };
+
+      const centerOnPin = (pin, nextScale = Math.max(scale, 1.35)) => {
+        if (!viewport) return;
+        scale = Math.min(3, Math.max(0.75, nextScale));
+        const rect = viewport.getBoundingClientRect();
+        const mapSize = rect.width;
+        const px = Number.parseFloat(pin.style.getPropertyValue('--x')) / 100 * mapSize;
+        const py = Number.parseFloat(pin.style.getPropertyValue('--y')) / 100 * mapSize;
+        x = rect.width / 2 - px * scale;
+        y = rect.height / 2 - py * scale;
+        renderTransform();
+      };
+
+      const openPin = (pin, shouldCenter = true) => {
         const id = pin.getAttribute('data-zone-id');
         selectedPin?.classList.remove('is-selected');
         selectedPin = pin;
         selectedPin.classList.add('is-selected');
+        if (shouldCenter) centerOnPin(pin);
         if (detail && detailTitle && detailSummary && detailTip) {
           detail.hidden = false;
-          detail.dataset.zoneName = pin.getAttribute('data-zone-name') || '';
-          detailTitle.textContent = pin.getAttribute('data-zone-name') || '';
-          detailSummary.textContent = pin.getAttribute('data-zone-summary') || '';
-          detailTip.textContent = pin.getAttribute('data-zone-tip') || '';
+          detail.dataset.zoneName = getPinName(pin);
+          detailTitle.textContent = getPinName(pin);
+          detailSummary.textContent = getPinSummary(pin);
+          detailTip.textContent = getPinDetail(pin);
           if (trackLink) trackLink.href = `/tracker/?add=${encodeURIComponent(detail.dataset.zoneName)}`;
         }
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+
+      const renderMarks = () => {
+        if (customLayer) {
+          customLayer.innerHTML = customMarks
+            .map(
+              (mark, index) =>
+                `<button type="button" class="map-pin custom is-visible" data-map-custom-pin="${mark.id}" style="--x:${mark.x}%; --y:${mark.y}%"><span>${buildMarkLabel(mark, index)}</span></button>`
+            )
+            .join('');
+        }
+        if (markList) {
+          markList.innerHTML = customMarks.length
+            ? customMarks
+                .map(
+                  (mark, index) =>
+                    `<div class="map-mark-row"><button type="button" data-map-mark-focus="${mark.id}">${buildMarkLabel(mark, index)}</button><button type="button" class="map-mark-remove" data-map-mark-remove="${mark.id}">×</button></div>`
+                )
+                .join('')
+            : `<p class="map-mark-empty">${currentLanguage === 'zh' ? '暂无标记' : 'No markers yet'}</p>`;
+        }
+      };
+
+      const addMark = (clientX, clientY) => {
+        if (!viewport) return;
+        const rect = viewport.getBoundingClientRect();
+        const mapSize = rect.width;
+        const mapX = ((clientX - rect.left - x) / scale / mapSize) * 100;
+        const mapY = ((clientY - rect.top - y) / scale / mapSize) * 100;
+        const nextMark = {
+          id: `mark-${Date.now()}`,
+          x: Number(Math.min(98, Math.max(2, mapX)).toFixed(2)),
+          y: Number(Math.min(98, Math.max(2, mapY)).toFixed(2))
+        };
+        customMarks = [...customMarks, nextMark];
+        saveMarks();
+        renderMarks();
+      };
+
+      const applyLanguage = (language) => {
+        currentLanguage = language || 'zh';
+        pins.forEach((pin) => {
+          const label = pin.querySelector('[data-map-pin-label]');
+          if (label) label.textContent = getPinName(pin);
+        });
+        listPinButtons.forEach((button) => {
+          const label = button.querySelector('span');
+          if (label) label.textContent = currentLanguage === 'zh' ? button.getAttribute('data-pin-name') || '' : button.getAttribute('data-pin-en') || button.getAttribute('data-pin-name') || '';
+        });
+        document.querySelectorAll('[data-map-copy]').forEach((node) => {
+          node.textContent = readText(node, currentLanguage === 'zh' ? 'zh' : 'en');
+        });
+        if (selectedPin && !detail.hidden) openPin(selectedPin, false);
+        renderMarks();
+        update();
+      };
+
+      const update = () => {
+        const keyword = input?.value.trim().toLowerCase() ?? '';
+        const apply = (node) => {
+          const type = node.getAttribute('data-layer');
+          const text = node.getAttribute('data-search')?.toLowerCase() ?? '';
+          const visible = (!type || visibleLayers.has(type)) && (!keyword || text.includes(keyword));
+          node.toggleAttribute('hidden', !visible);
+          if (node.matches?.('[data-map-pin]')) node.classList.toggle('is-visible', visible);
+        };
+        zones.forEach(apply);
+        pins.forEach(apply);
+        visibilityButtons.forEach((button) => {
+          const layer = button.getAttribute('data-map-layer-visibility');
+          button.setAttribute('aria-pressed', String(Boolean(layer && visibleLayers.has(layer))));
+        });
+        if (searchResults) {
+          const matches = keyword
+            ? pins.filter((pin) => !pin.hidden && (pin.getAttribute('data-search') || '').toLowerCase().includes(keyword)).slice(0, 8)
+            : [];
+          searchResults.innerHTML = matches
+            .map((pin) => `<button type="button" data-result-id="${pin.getAttribute('data-zone-id')}"><span>${getPinName(pin)}</span><small>${getLayerLabel(pin.getAttribute('data-layer'))}</small></button>`)
+            .join('');
+          searchResults.hidden = matches.length === 0;
+        }
+      };
+
+      const refreshMap = () => {
+        scale = 1;
+        x = 0;
+        y = 0;
+        markMode = false;
+        markModeButton?.setAttribute('aria-pressed', 'false');
+        viewport?.classList.remove('is-mark-mode');
+        if (input) input.value = '';
+        resetDetail();
+        renderTransform();
+        update();
+      };
+
+      input?.addEventListener('input', update);
+      searchResults?.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-result-id]');
+        if (!button) return;
+        const pin = pins.find((item) => item.getAttribute('data-zone-id') === button.getAttribute('data-result-id'));
+        if (pin) openPin(pin);
       });
-    });
-    update();
-    renderTransform();
+      layerToggles.forEach((button) => {
+        button.addEventListener('click', () => {
+          const layer = button.getAttribute('data-map-layer-toggle');
+          const group = layerGroups.find((item) => item.getAttribute('data-map-layer-group') === layer);
+          if (!group) return;
+          group.dataset.expanded = group.dataset.expanded === 'true' ? 'false' : 'true';
+        });
+      });
+      visibilityButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const layer = button.getAttribute('data-map-layer-visibility');
+          if (!layer) return;
+          if (visibleLayers.has(layer)) visibleLayers.delete(layer);
+          else visibleLayers.add(layer);
+          update();
+        });
+      });
+      listPinButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const id = button.getAttribute('data-map-list-pin');
+          const pin = pins.find((item) => item.getAttribute('data-zone-id') === id);
+          const layer = pin?.getAttribute('data-layer');
+          if (layer) visibleLayers.add(layer);
+          update();
+          if (pin) openPin(pin);
+        });
+      });
+      document.querySelector('[data-map-zoom="in"]')?.addEventListener('click', () => zoom(scale + 0.2));
+      document.querySelector('[data-map-zoom="out"]')?.addEventListener('click', () => zoom(scale - 0.2));
+      document.querySelector('[data-map-reset]')?.addEventListener('click', () => {
+        scale = 1;
+        x = 0;
+        y = 0;
+        renderTransform();
+      });
+      refreshButton?.addEventListener('click', refreshMap);
+      fullscreenButton?.addEventListener('click', async () => {
+        const panel = document.querySelector('[data-interactive-map]');
+        if (!panel) return;
+        if (!document.fullscreenElement) await panel.requestFullscreen?.();
+        else await document.exitFullscreen?.();
+      });
+      markModeButton?.addEventListener('click', () => {
+        markMode = !markMode;
+        markModeButton.setAttribute('aria-pressed', String(markMode));
+        viewport?.classList.toggle('is-mark-mode', markMode);
+      });
+      document.querySelector('[data-map-export]')?.addEventListener('click', () => {
+        const image = stage?.querySelector('img');
+        if (!(image instanceof HTMLImageElement) || !image.complete || !viewport) return;
+        const rect = viewport.getBoundingClientRect();
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(rect.width * 2);
+        canvas.height = Math.round(rect.height * 2);
+        const context = canvas.getContext('2d');
+        if (!context) return;
+        context.scale(2, 2);
+        context.fillStyle = '#6ca7b6';
+        context.fillRect(0, 0, rect.width, rect.height);
+        const baseSize = rect.width * scale;
+        context.drawImage(image, x, y, baseSize, baseSize);
+        const drawMarker = (marker, fill) => {
+          const markerX = x + (Number.parseFloat(marker.style.getPropertyValue('--x')) / 100) * baseSize;
+          const markerY = y + (Number.parseFloat(marker.style.getPropertyValue('--y')) / 100) * baseSize;
+          context.beginPath();
+          context.arc(markerX, markerY, marker.classList.contains('custom') ? 6 : 5, 0, Math.PI * 2);
+          context.fillStyle = fill;
+          context.fill();
+          context.lineWidth = 2;
+          context.strokeStyle = '#ffffff';
+          context.stroke();
+        };
+        pins.filter((pin) => !pin.hidden).forEach((pin) => drawMarker(pin, '#2f4a43'));
+        customLayer?.querySelectorAll('[data-map-custom-pin]').forEach((marker) => drawMarker(marker, '#d8744f'));
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'heartopia-map.png';
+        link.click();
+      });
+      closeButton?.addEventListener('click', () => {
+        resetDetail();
+      });
+      viewport?.addEventListener('wheel', (event) => {
+        event.preventDefault();
+        zoom(scale + (event.deltaY < 0 ? 0.1 : -0.1));
+      }, { passive: false });
+      viewport?.addEventListener('pointerdown', (event) => {
+        if (event.target.closest('[data-map-pin]')) return;
+        dragging = true;
+        startX = event.clientX - x;
+        startY = event.clientY - y;
+        dragDistance = 0;
+        viewport.setPointerCapture(event.pointerId);
+      });
+      viewport?.addEventListener('pointermove', (event) => {
+        if (!dragging) return;
+        dragDistance += Math.abs(event.movementX) + Math.abs(event.movementY);
+        x = event.clientX - startX;
+        y = event.clientY - startY;
+        renderTransform();
+      });
+      viewport?.addEventListener('pointerup', (event) => {
+        if (markMode && dragDistance < 8 && !event.target.closest('[data-map-pin]')) addMark(event.clientX, event.clientY);
+        dragging = false;
+      });
+      viewport?.addEventListener('pointercancel', () => {
+        dragging = false;
+      });
+      pins.forEach((pin) => {
+        pin.addEventListener('click', () => openPin(pin));
+      });
+      customLayer?.addEventListener('click', (event) => {
+        const marker = event.target.closest('[data-map-custom-pin]');
+        if (!marker) return;
+        centerOnPin(marker, Math.max(scale, 1.2));
+      });
+      markList?.addEventListener('click', (event) => {
+        const focusButton = event.target.closest('[data-map-mark-focus]');
+        if (focusButton) {
+          const marker = customLayer?.querySelector(`[data-map-custom-pin="${focusButton.getAttribute('data-map-mark-focus')}"]`);
+          if (marker) centerOnPin(marker, Math.max(scale, 1.2));
+        }
+        const removeButton = event.target.closest('[data-map-mark-remove]');
+        if (removeButton) {
+          customMarks = customMarks.filter((mark) => mark.id !== removeButton.getAttribute('data-map-mark-remove'));
+          saveMarks();
+          renderMarks();
+        }
+      });
+      clearMarksButton?.addEventListener('click', () => {
+        customMarks = [];
+        saveMarks();
+        renderMarks();
+      });
+      document.addEventListener('heartopia:language-applied', (event) => {
+        applyLanguage(event.detail?.language);
+      });
+      customMarks = loadMarks();
+      renderMarks();
+      update();
+      renderTransform();
+      applyLanguage(currentLanguage);
     })();
   </script>
 </BaseLayout>

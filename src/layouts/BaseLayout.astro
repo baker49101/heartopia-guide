@@ -138,18 +138,18 @@ const structuredData = {
 };
 
 const databaseMenu = [
-  { href: '/database/achievements/', label: '成就', icon: Trophy },
-  { href: '/database/fish/', label: '鱼类', icon: Fish },
-  { href: '/database/insects/', label: '昆虫', icon: Bug },
-  { href: '/database/birds/', label: '鸟类', icon: Bird },
-  { href: '/database/crops/', label: '农作物', icon: Sprout },
-  { href: '/database/flowers/', label: '花卉', icon: Flower2 },
-  { href: '/database/forageables/', label: '采集物', icon: Leaf },
-  { href: '/database/wildlife/', label: '野生动物', icon: PawPrint },
-  { href: '/database/pets/', label: '宠物', icon: Heart },
-  { href: '/database/music/', label: '乐谱', icon: Music },
-  { href: '/database/recipes/', label: '食谱', icon: CookingPot },
-  { href: '/database/characters/', label: '角色', icon: Users }
+  { href: '/database/achievements/', label: '成就', key: 'collection.achievements', icon: Trophy },
+  { href: '/database/fish/', label: '鱼类', key: 'collection.fish', icon: Fish },
+  { href: '/database/insects/', label: '昆虫', key: 'collection.insects', icon: Bug },
+  { href: '/database/birds/', label: '鸟类', key: 'collection.birds', icon: Bird },
+  { href: '/database/crops/', label: '农作物', key: 'collection.crops', icon: Sprout },
+  { href: '/database/flowers/', label: '花卉', key: 'collection.flowers', icon: Flower2 },
+  { href: '/database/forageables/', label: '采集物', key: 'collection.forage', icon: Leaf },
+  { href: '/database/wildlife/', label: '野生动物', key: 'collection.wildlife', icon: PawPrint },
+  { href: '/database/pets/', label: '宠物', key: 'collection.pets', icon: Heart },
+  { href: '/database/music/', label: '乐谱', key: 'collection.music', icon: Music },
+  { href: '/database/recipes/', label: '食谱', key: 'collection.recipes', icon: CookingPot },
+  { href: '/database/characters/', label: '角色', key: 'collection.characters', icon: Users }
 ];
 ---
 
@@ -199,7 +199,7 @@ const databaseMenu = [
             <BookOpen size={17} aria-hidden="true" /> <span data-i18n="nav.guides">攻略</span>
           </a>
           <div class="nav-dropdown">
-            <a class="nav-link" href="/database/" aria-current={isCurrent('/database/') ? 'page' : undefined}>
+            <a class="nav-link" href="/database/" aria-current={isCurrent('/database/') && !isCurrent('/database/recipes/') ? 'page' : undefined}>
               <Database size={17} aria-hidden="true" /> <span data-i18n="nav.database">图鉴</span>
               <ChevronDown size={14} aria-hidden="true" />
             </a>
@@ -210,7 +210,7 @@ const databaseMenu = [
                   return (
                     <a class="nav-menu-link" href={item.href}>
                       <Icon size={15} aria-hidden="true" />
-                      <span>{item.label}</span>
+                      <span data-i18n={item.key}>{item.label}</span>
                     </a>
                   );
                 })
@@ -219,6 +219,9 @@ const databaseMenu = [
           </div>
           <a class="nav-link" href="/activities/" aria-current={isCurrent('/activities/') ? 'page' : undefined}>
             <CalendarDays size={17} aria-hidden="true" /> <span data-i18n="nav.activities">活动</span>
+          </a>
+          <a class="nav-link" href="/database/recipes/" aria-current={isCurrent('/database/recipes/') ? 'page' : undefined}>
+            <CookingPot size={17} aria-hidden="true" /> <span data-i18n="nav.recipes">食谱</span>
           </a>
           <a class="nav-link" href="/maps/" aria-current={isCurrent('/maps/') ? 'page' : undefined}>
             <Map size={17} aria-hidden="true" /> <span data-i18n="nav.maps">地图</span>

@@ -4,15 +4,6 @@ import GuideCard from '../components/GuideCard.astro';
 import { dailyChecklist, databaseSections, quickEntries } from '../data/home';
 import { SITE } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const popularSearchLinks = [
-  { href: '/database/fish/', label: '心动小镇鱼类图鉴', detail: '地点、天气、时间、鱼影、售价' },
-  { href: '/database/recipes/', label: '心动小镇食谱攻略', detail: '食材、解锁、成本、利润、能量' },
-  { href: '/maps/', label: 'Heartopia 互动地图', detail: '地点、角色、商店、巴士、资源图层' },
-  { href: '/database/characters/', label: '心动小镇角色图鉴', detail: '位置、解锁、礼物偏好、商店' },
-  { href: '/database/achievements/', label: '心动小镇成就攻略', detail: '解锁条件、隐藏线索、奖励头衔' },
-  { href: '/database/insects/', label: '心动小镇昆虫图鉴', detail: '捕虫等级、地点、天气、时间' }
-];
 ---
 
 <BaseLayout>
@@ -45,26 +36,6 @@ const popularSearchLinks = [
         </div>
       </div>
     </aside>
-  </section>
-
-  <section class="section" data-pagefind-body>
-    <div class="section-head">
-      <div>
-        <span class="eyebrow">Popular Searches</span>
-        <h2>热门搜索入口</h2>
-        <p>把玩家最常搜的 Heartopia / 心动小镇资料入口放在首页，方便 Google 和玩家直接理解本站重点。</p>
-      </div>
-    </div>
-    <div class="seo-link-grid">
-      {
-        popularSearchLinks.map((link) => (
-          <a href={link.href}>
-            <strong>{link.label}</strong>
-            <span>{link.detail}</span>
-          </a>
-        ))
-      }
-    </div>
   </section>
 
   <section class="section">
